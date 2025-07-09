@@ -1,32 +1,45 @@
-templates/products/artisan_dashboard.html
-
 {% extends 'base.html' %}
+{% load form_filters %}
+
 {% block title %}Artisan Dashboard{% endblock %}
 
 {% block content %}
-<h2 class="text-2xl font-bold mb-4">Welcome, {{ user.username }}</h2>
+<div class="max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold mb-4 text-brown">Welcome, {{ user.username }}</h2>
 
-<h3 class="text-lg font-semibold mb-2">Your Products</h3>
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-dark">Your Products</h3>
+        <a href="{% url 'add_product' %}"
+           class="bg-brown text-white px-5 py-2 rounded-md hover:bg-mahogany transition duration-300">
+            + Add Product
+        </a>
+    </div>
 
-<a href="{% url 'add_product' %}" class="inline-block bg-teal-700 text-white px-4 py-2 rounded mb-4">+ Add New Product</a>
-
-<ul class="space-y-4">
-    {% for product in products %}
-        <li class="bg-white p-4 shadow rounded">
-            <div class="flex justify-between items-center">
-                <div>
-                    <p class="font-semibold">{{ product.name }}</p>
-                    <p>Price: ₹{{ product.price }}</p>
-                    <p>Stock: {{ product.stock }}</p>
+    <ul class="space-y-4">
+        {% for product in products %}
+            <li class="bg-white p-4 rounded shadow border border-sand">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold text-charcoal">{{ product.name }}</p>
+                        <p class="text-sm text-gray-600">Price: ₹{{ product.price }}</p>
+                        <p class="text-sm text-gray-600">Stock: {{ product.stock }}</p>
+                    </div>
+                    <div class="space-x-3">
+                        <a href="{% url 'edit_product' product.pk %}"
+                           class="text-blue-600 hover:underline font-medium">Edit</a>
+                        <a href="{% url 'delete_product' product.pk %}"
+                           class="text-red-600 hover:underline font-medium">Delete</a>
+                    </div>
                 </div>
-                <div class="space-x-2">
-                    <a href="{% url 'edit_product' product.pk %}" class="text-blue-600">Edit</a>
-                    <a href="{% url 'delete_product' product.pk %}" class="text-red-600">Delete</a>
-                </div>
-            </div>
-        </li>
-    {% empty %}
-        <li>No products yet. <a href="{% url 'add_product' %}" class="text-teal-700">Add one now</a>.</li>
-    {% endfor %}
-</ul>
+            </li>
+        {% empty %}
+            <li class="text-gray-500 text-center py-8">
+                You haven't added any products yet. <br>
+                <a href="{% url 'add_product' %}" class="text-brown hover:underline font-medium">
+                    Click here to add your first.
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}

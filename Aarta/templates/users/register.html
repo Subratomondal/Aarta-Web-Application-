@@ -32,9 +32,10 @@
         </div>
 
         <!-- Password 1 -->
-        <div class="mb-5">
+        <div class="mb-5 relative">
             <label for="id_password1" class="block text-sm font-medium text-dark mb-1">Password</label>
-            {{ form.password1|add_class:"w-full mt-1 border border-brown/30 px-4 py-2 rounded-md focus:ring-brown focus:border-brown" }}
+            {{ form.password1|add_class:"w-full mt-1 border border-brown/30 px-4 py-2 rounded-md pr-16 focus:ring-brown focus:border-brown" }}
+            <button type="button" onclick="togglePassword('id_password1', this)" class="absolute right-3 top-9 text-sm text-brown hover:underline">Show</button>
             {% if form.password1.errors %}
                 <ul class="text-sm text-red-600 list-disc ml-5 mt-1">
                     {% for err in form.password1.errors %}
@@ -45,9 +46,10 @@
         </div>
 
         <!-- Password 2 -->
-        <div class="mb-5">
+        <div class="mb-5 relative">
             <label for="id_password2" class="block text-sm font-medium text-dark mb-1">Confirm Password</label>
-            {{ form.password2|add_class:"w-full mt-1 border border-brown/30 px-4 py-2 rounded-md focus:ring-brown focus:border-brown" }}
+            {{ form.password2|add_class:"w-full mt-1 border border-brown/30 px-4 py-2 rounded-md pr-16 focus:ring-brown focus:border-brown" }}
+            <button type="button" onclick="togglePassword('id_password2', this)" class="absolute right-3 top-9 text-sm text-brown hover:underline">Show</button>
             {% if form.password2.errors %}
                 <p class="text-sm text-red-600 mt-1">{{ form.password2.errors.0 }}</p>
             {% endif %}
@@ -72,4 +74,17 @@
         <a href="/users/login/" class="text-brown font-medium hover:underline">Login</a>
     </p>
 </div>
+
+<script>
+function togglePassword(fieldId, toggleBtn) {
+    const input = document.getElementById(fieldId);
+    if (input.type === "password") {
+        input.type = "text";
+        toggleBtn.innerText = "Hide";
+    } else {
+        input.type = "password";
+        toggleBtn.innerText = "Show";
+    }
+}
+</script>
 {% endblock %}

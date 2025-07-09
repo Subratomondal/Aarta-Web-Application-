@@ -2,25 +2,29 @@
 {% block title %}My Products{% endblock %}
 
 {% block content %}
-<h2 class="text-xl font-semibold mb-4">My Products</h2>
-<a href="{% url 'add_product' %}" class="inline-block mb-4 bg-teal-700 text-white px-4 py-2 rounded">+ Add New</a>
+<div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold mb-4 text-charcoal">My Products</h2>
+    <a href="{% url 'add_product' %}" class="inline-block mb-4 bg-brown text-white px-4 py-2 rounded hover:bg-mahogany transition">
+        + Add New
+    </a>
 
-<ul class="space-y-4">
-    {% for product in products %}
-        <li class="bg-white p-4 shadow rounded">
-            <div class="flex justify-between items-center">
-                <div>
-                    <strong>{{ product.name }}</strong><br>
-                    ₹{{ product.price }} – {{ product.stock }} in stock
+    <ul class="space-y-4">
+        {% for product in products %}
+            <li class="bg-cream p-4 shadow rounded-xl border border-sand">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold text-charcoal">{{ product.name }}</p>
+                        <p class="text-sm text-charcoal/70">₹{{ product.price }} – {{ product.stock }} in stock</p>
+                    </div>
+                    <div class="space-x-3">
+                        <a href="{% url 'edit_product' product.pk %}" class="text-blue-600 hover:underline">Edit</a>
+                        <a href="{% url 'delete_product' product.pk %}" class="text-red-600 hover:underline">Delete</a>
+                    </div>
                 </div>
-                <div class="space-x-2">
-                    <a href="{% url 'edit_product' product.pk %}" class="text-blue-600">Edit</a>
-                    <a href="{% url 'delete_product' product.pk %}" class="text-red-600">Delete</a>
-                </div>
-            </div>
-        </li>
-    {% empty %}
-        <li>No products added yet.</li>
-    {% endfor %}
-</ul>
+            </li>
+        {% empty %}
+            <li class="text-center text-charcoal/70 py-6">No products found.</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}

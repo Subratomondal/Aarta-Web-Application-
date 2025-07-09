@@ -9,6 +9,12 @@
         Welcome Back
     </h2>
 
+    {% if form.errors %}
+        <p class="text-red-600 text-sm text-center mb-4">
+            Invalid username or password. Please try again.
+        </p>
+    {% endif %}
+
     <form method="post" class="space-y-5">
         {% csrf_token %}
 
@@ -21,11 +27,12 @@
         </div>
 
         <!-- Password -->
-        <div>
+        <div class="relative">
             <label for="pwd" class="block text-sm font-medium text-dark mb-1">Password</label>
             <input type="password" id="pwd" name="password"
-                class="w-full px-4 py-2 border border-sand rounded-md focus:outline-none focus:ring-2 focus:ring-brown transition"
+                class="w-full px-4 py-2 border border-sand rounded-md pr-16 focus:outline-none focus:ring-2 focus:ring-brown transition"
                 required>
+            <button type="button" onclick="togglePassword('pwd', this)" class="absolute right-3 top-9 text-sm text-brown hover:underline">Show</button>
         </div>
 
         <!-- Submit -->
@@ -41,4 +48,17 @@
         <a href="/users/register/" class="text-brown font-semibold hover:underline">Register</a>
     </p>
 </div>
+
+<script>
+function togglePassword(fieldId, toggleBtn) {
+    const input = document.getElementById(fieldId);
+    if (input.type === "password") {
+        input.type = "text";
+        toggleBtn.innerText = "Hide";
+    } else {
+        input.type = "password";
+        toggleBtn.innerText = "Show";
+    }
+}
+</script>
 {% endblock %}

@@ -72,3 +72,5 @@ def artisan_dashboard(request):
     return render(request, 'products/artisan_dashboard.html', {
         'products': products
     })
+
+

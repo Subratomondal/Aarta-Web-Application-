@@ -2,14 +2,18 @@
 {% block title %}Delete Product{% endblock %}
 
 {% block content %}
-<div class="max-w-md bg-white p-6 shadow rounded">
-    <h2 class="text-xl mb-4">Confirm Deletion</h2>
-    <p>Are you sure you want to delete <strong>{{ product.name }}</strong>?</p>
+<div class="max-w-lg mx-auto bg-cream p-8 shadow-md rounded-xl border border-sand text-center">
+    <h2 class="text-2xl font-bold text-red-700 mb-4">Delete Product</h2>
+    <p class="text-charcoal mb-6">Are you sure you want to delete <strong>{{ product.name }}</strong>?</p>
 
-    <form method="post" class="mt-4">
+    <form method="post" class="flex justify-center gap-4">
         {% csrf_token %}
-        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">Yes, Delete</button>
-        <a href="{% url 'my_products' %}" class="ml-4 text-gray-700">Cancel</a>
+        <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition">
+            Yes, Delete
+        </button>
+        <a href="{% url 'my_products' %}" class="bg-sand text-dark px-6 py-2 rounded hover:bg-peach transition">
+            Cancel
+        </a>
     </form>
 </div>
 {% endblock %}

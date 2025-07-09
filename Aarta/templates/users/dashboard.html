@@ -11,7 +11,7 @@
     {% if products %}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for product in products %}
-                <div class="border p-4 rounded shadow">
+                <div class="border p-4 rounded shadow hover:shadow-md transition">
                     <h3 class="text-lg font-semibold">{{ product.name }}</h3>
                     <p class="text-sm text-gray-500">Price: ₹{{ product.price }}</p>
                     <p class="text-sm text-gray-500">Stock: {{ product.stock }}</p>
@@ -19,12 +19,20 @@
             {% endfor %}
         </div>
     {% else %}
-        <p class="text-gray-500">You haven’t posted any products yet.</p>
+        <div class="text-center py-10">
+            <p class="text-gray-500 mb-4">You haven’t posted any products yet.</p>
+            <a href="/products/add/" class="inline-block bg-brown text-white px-4 py-2 rounded hover:bg-mahogany transition">
+                + Upload First Product
+            </a>
+        </div>
     {% endif %}
 
     <div class="mt-6">
-        <a href="/products/add/" class="inline-block bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
-            + Add New Product
+        <a href="/products/add/" class="inline-flex items-center gap-2 bg-brown text-white px-4 py-2 rounded hover:bg-mahogany transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add New Product
         </a>
     </div>
 </div>
