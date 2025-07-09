@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Register – CraftNest{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-peach p-8 shadow-lg rounded-xl border border-sand">
+    <h2 class="text-3xl font-display text-brown font-semibold mb-6 text-center">Create Your Account</h2>
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="w-full bg-brown hover:bg-mahogany text-white font-medium py-2 rounded transition">
+            Register
+        </button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-dark">
+        Already have an account?
+        <a href="/users/login/" class="text-brown hover:underline font-medium">Login</a>
+    </p>
+</div>
+{% endblock %}

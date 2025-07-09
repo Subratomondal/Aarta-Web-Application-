@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Login – CraftNest{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-peach p-8 shadow-lg rounded-xl border border-sand">
+    <h2 class="text-3xl font-display text-brown font-semibold mb-6 text-center">Welcome Back</h2>
+
+    <form method="post" class="space-y-5">
+        {% csrf_token %}
+
+        <div>
+            <label for="un" class="block text-sm font-medium text-dark mb-1">Username:</label>
+            <input type="text" id="un" name="username" class="w-full px-4 py-2 border border-sand rounded focus:outline-none focus:ring-2 focus:ring-brown" required>
+        </div>
+
+        <div>
+            <label for="pwd" class="block text-sm font-medium text-dark mb-1">Password:</label>
+            <input type="password" id="pwd" name="password" class="w-full px-4 py-2 border border-sand rounded focus:outline-none focus:ring-2 focus:ring-brown" required>
+        </div>
+
+        <button type="submit" class="w-full bg-brown hover:bg-mahogany text-white py-2 rounded font-medium transition">
+            Login
+        </button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-dark">
+        Don't have an account?
+        <a href="/users/register/" class="text-brown hover:underline font-medium">Register</a>
+    </p>
+</div>
+{% endblock %}

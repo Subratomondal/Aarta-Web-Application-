@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Aarta – Spirit-woven Creations{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Tailwind Configuration for Theme Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#F9F3EC',
+                        peach: '#F8E2C4',
+                        sand: '#E5CCAB',
+                        clay: '#DAB587',
+                        brown: '#AB531F',
+                        mahogany: '#481401',
+                        dark: '#2F2F2F',
+                    },
+                    fontFamily: {
+                        display: ['Playfair Display', 'serif'],
+                        body: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="font-body bg-cream text-dark">
+
+    {% load static %}
+
+    <!-- Header -->
+    <header class="bg-peach shadow-sm py-5">
+        <div class="container mx-auto flex items-center justify-between px-4">
+            <!-- Logo and Site Name -->
+            <div class="flex items-center space-x-3">
+                <img src="{% static 'image/logo-removebg-preview.png' %}" alt="CraftNest Logo" class="h-10 w-auto">
+
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="space-x-6 text-sm font-medium">
+                <a href="/" class="text-dark hover:text-brown transition">Home</a>
+                <a href="/products/" class="text-dark hover:text-brown transition">Products</a>
+                <a href="/users/dashboard/" class="text-dark hover:text-brown transition">Dashboard</a>
+                <a href="/users/login/" class="text-dark hover:text-brown transition">Login</a>
+                <a href="/users/register/" class="bg-brown text-white px-3 py-1 rounded hover:bg-mahogany transition">Register</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto py-12 px-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-sand text-center py-6 mt-12">
+        <p class="text-dark text-sm font-medium">© 2025 <span class="font-display font-semibold">Aarta</span>. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
