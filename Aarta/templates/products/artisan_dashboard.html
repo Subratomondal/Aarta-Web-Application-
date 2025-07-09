@@ -1,0 +1,32 @@
+templates/products/artisan_dashboard.html
+
+{% extends 'base.html' %}
+{% block title %}Artisan Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Welcome, {{ user.username }}</h2>
+
+<h3 class="text-lg font-semibold mb-2">Your Products</h3>
+
+<a href="{% url 'add_product' %}" class="inline-block bg-teal-700 text-white px-4 py-2 rounded mb-4">+ Add New Product</a>
+
+<ul class="space-y-4">
+    {% for product in products %}
+        <li class="bg-white p-4 shadow rounded">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-semibold">{{ product.name }}</p>
+                    <p>Price: ₹{{ product.price }}</p>
+                    <p>Stock: {{ product.stock }}</p>
+                </div>
+                <div class="space-x-2">
+                    <a href="{% url 'edit_product' product.pk %}" class="text-blue-600">Edit</a>
+                    <a href="{% url 'delete_product' product.pk %}" class="text-red-600">Delete</a>
+                </div>
+            </div>
+        </li>
+    {% empty %}
+        <li>No products yet. <a href="{% url 'add_product' %}" class="text-teal-700">Add one now</a>.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

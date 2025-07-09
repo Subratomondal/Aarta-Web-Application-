@@ -10,12 +10,12 @@ def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)  # Auto login after register
-            messages.success(request, "Registration successful.")
-            return redirect('home')
-        else:
-            messages.error(request, "Please correct the errors below.")
+            user = form.save(commit=False)
+            user.is_artisan = form.cleaned_data.get('is_artisan')
+            user.save()
+            return redirect('artisan_dashboard' if user.is_artisan else 'home')
+
+
     else:
         form = RegisterForm()
 
@@ -46,7 +46,7 @@ def artisan_dashboard(request):
     if not request.user.is_artisan:
         return redirect('home')  # or show access denied message
 
-    products = Product.objects.filter(artisan=request.user)
+    products = Product.objects.filter(artisan=request.user.artisanprofile)
 
     return render(request, 'users/dashboard.html',
                   {
