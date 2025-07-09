@@ -11,6 +11,7 @@
             theme: {
                 extend: {
                     colors: {
+
                         cream: '#F9F3EC',
                         peach: '#F8E2C4',
                         sand: '#E5CCAB',
@@ -18,6 +19,7 @@
                         brown: '#AB531F',
                         mahogany: '#481401',
                         dark: '#2F2F2F',
+                        charcoal: '#1F1F1F'
                     },
                     fontFamily: {
                         display: ['Playfair Display', 'serif'],
@@ -76,9 +78,65 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-sand text-center py-6 mt-12">
-        <p class="text-dark text-sm font-medium">© 2025 <span class="font-display font-semibold">Aarta</span>. All rights reserved.</p>
+    <footer class="bg-charcoal text-cream py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="mb-4">
+                        <img src="{% static 'image/logo-removebg-preview.png' %}" alt="ArtisanMarket Logo" class="h-12">
+                    </div>
+                    <p class="text-cream/70 mb-4">
+                        Where creativity meets commerce. Empowering artists and connecting them with art lovers worldwide.
+                    </p>
+                    <div class="flex space-x-4">
+                        <!-- Social Icons -->
+                        <!-- [SVGs you provided] -->
+                        <!-- Keep all your social SVGs here unchanged -->
+                    </div>
+                </div>
+
+                <!-- Column 2 -->
+                <div>
+                    <h3 class="font-serif font-bold mb-4">For Artisans</h3>
+                    <ul class="space-y-2 text-cream/70">
+                        <li><a href="/users/register/" class="hover:text-cream transition-colors">Join as Seller</a></li>
+                        <li><a href="#" class="hover:text-cream transition-colors">Seller Guidelines</a></li>
+                        <li><a href="#" class="hover:text-cream transition-colors">Commission Rates</a></li>
+                        <li><a href="#" class="hover:text-cream transition-colors">Success Stories</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3 -->
+                <div>
+                    <h3 class="font-serif font-bold mb-4">For Buyers</h3>
+                    <ul class="space-y-2 text-cream/70">
+                        <li><a href="#" class="hover:text-cream transition-colors">Browse Art</a></li>
+                        <li><a href="#" class="hover:text-cream transition-colors">Custom Orders</a></li>
+                        <li><a href="#" class="hover:text-cream transition-colors">Gift Cards</a></li>
+                        <li><a href="#" class="hover:text-cream transition-colors">Shipping Info</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4 -->
+                <div>
+                    <h3 class="font-serif font-bold mb-4">Support</h3>
+                    <ul class="space-y-2 text-cream/70">
+                        <li><a href="#" class="hover:text-cream transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-cream transition-colors">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-cream transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-cream transition-colors">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Note -->
+            <div class="border-t border-cream/20 pt-8 text-center text-cream/70">
+                <p>&copy; 2025 Aarta. All rights reserved. Made with ❤️ for artists and art lovers.</p>
+            </div>
+        </div>
     </footer>
+
+
 
 </body>
 </html>
