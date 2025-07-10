@@ -1,27 +1,40 @@
 {% extends 'base.html' %}
-{% load form_filters %}
+{% load product_filters %}
 
 {% block title %}Add Product{% endblock %}
 
 {% block content %}
 <div class="max-w-xl mx-auto bg-peach/50 p-8 rounded-2xl shadow-lg border border-sand">
     <h2 class="text-2xl font-bold mb-6 text-center text-charcoal">Add New Product</h2>
-    <form method="post" class="space-y-5">
+
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
         {% csrf_token %}
+
         {% for field in form %}
             <div>
                 <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-dark mb-1">
                     {{ field.label }}
                 </label>
-                {{ field|add_class:"w-full border border-sand px-4 py-2 rounded-md focus:ring-brown focus:border-brown bg-white/70 backdrop-blur-md" }}
+                {{ field|add_class:"w-full border border-sand px-4 py-2 rounded-md bg-white/70 backdrop-blur-md focus:ring-brown focus:border-brown" }}
                 {% if field.errors %}
                     <p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>
                 {% endif %}
             </div>
         {% endfor %}
+
+        <div>
+            <label for="images" class="block text-sm font-medium text-dark mb-1">
+                Product Images
+            </label>
+            <input type="file" name="images" id="images" multiple
+                class="w-full border border-sand px-4 py-2 rounded-md bg-white/70 backdrop-blur-md focus:ring-brown focus:border-brown">
+            <p class="text-xs text-charcoal/70 mt-1">You can select multiple images</p>
+        </div>
+
         <button type="submit" class="w-full bg-brown text-white py-2 rounded-md hover:bg-mahogany transition">
             Add Product
         </button>
     </form>
 </div>
 {% endblock %}
+

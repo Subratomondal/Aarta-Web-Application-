@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Explore Products{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-6">
+    <h2 class="text-3xl font-bold mb-6 text-brown text-center">Explore Handmade Creations</h2>
+
+    {% if products %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for product in products %}
+                <a href="{% url 'product_detail' product.pk %}" class="block bg-white rounded-xl shadow border border-sand overflow-hidden hover:shadow-lg transition duration-300">
+                    {% if product.images.first %}
+                        <div class="w-full aspect-square overflow-hidden">
+                            <img src="{{ product.images.first.image_path.url }}" alt="{{ product.name }}"
+                                 class="w-full h-full object-cover">
+                        </div>
+                    {% else %}
+                        <div class="w-full aspect-square flex items-center justify-center bg-gray-100 text-gray-500 text-sm">
+                            No Image
+                        </div>
+                    {% endif %}
+
+                    <div class="p-4">
+                        <h4 class="text-lg font-semibold text-charcoal mb-1">{{ product.name }}</h4>
+                        <p class="text-sm text-gray-600">₹{{ product.price }}</p>
+                        <p class="text-sm text-gray-600">Stock: {{ product.stock }}</p>
+                        <p class="text-sm text-gray-600">From: {{ product.location }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center text-gray-500 py-10">
+            No products available right now.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

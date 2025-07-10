@@ -11,10 +11,20 @@
     <ul class="space-y-4">
         {% for product in products %}
             <li class="bg-cream p-4 shadow rounded-xl border border-sand">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold text-charcoal">{{ product.name }}</p>
-                        <p class="text-sm text-charcoal/70">₹{{ product.price }} – {{ product.stock }} in stock</p>
+                <div class="flex items-start justify-between">
+                    <div class="flex space-x-4">
+                        <!-- Show first image if exists -->
+                        {% if product.images.all %}
+                            <img src="{{ product.images.first.image_path.url }}" alt="{{ product.name }}" class="w-24 h-24 object-cover rounded border border-sand">
+                        {% else %}
+                            <div class="w-24 h-24 flex items-center justify-center text-sm text-charcoal/50 bg-white border border-sand rounded">
+                                No Image
+                            </div>
+                        {% endif %}
+                        <div>
+                            <p class="font-semibold text-charcoal">{{ product.name }}</p>
+                            <p class="text-sm text-charcoal/70">₹{{ product.price }} – {{ product.stock }} in stock</p>
+                        </div>
                     </div>
                     <div class="space-x-3">
                         <a href="{% url 'edit_product' product.pk %}" class="text-blue-600 hover:underline">Edit</a>

@@ -1,8 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ProductForm
-from .models import Product
+from .models import Product, ProductImage
 from users.models import ArtisanProfile
 from django.contrib.auth.decorators import login_required
+
+def product_gallery(request):
+    products = Product.objects.filter(is_approved=True).order_by('-created_at')
+    return render(request, 'products/product_gallery.html', {'products': products})
+
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if not product.is_approved and not request.user.is_staff:
+        return redirect('product_gallery')
+    return render(request, 'products/product_detail.html', {'product': product})
 
 
 @login_required
@@ -73,4 +83,27 @@ def artisan_dashboard(request):
         'products': products
     })
 
+@login_required
+def add_product(request):
+    try:
+        artisan_profile = request.user.artisanprofile
+    except ArtisanProfile.DoesNotExist:
+        return redirect('dashboard')
 
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        images = request.FILES.getlist('images')  # ✅ use a plain input name 'images'
+
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.artisan = artisan_profile
+            product.save()
+
+            for image in images:
+                ProductImage.objects.create(product=product, image_path=image)
+
+            return redirect('my_products')
+    else:
+        form = ProductForm()
+
+    return render(request, 'products/add_product.html', {'form': form})

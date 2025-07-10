@@ -1,45 +1,85 @@
 {% extends 'base.html' %}
-{% load form_filters %}
-
 {% block title %}Artisan Dashboard{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold mb-4 text-brown">Welcome, {{ user.username }}</h2>
+<div class="max-w-6xl mx-auto px-4">
+    <h2 class="text-3xl font-bold mb-6 text-brown">Welcome, {{ user.username }}</h2>
 
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-dark">Your Products</h3>
-        <a href="{% url 'add_product' %}"
-           class="bg-brown text-white px-5 py-2 rounded-md hover:bg-mahogany transition duration-300">
+    <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-semibold text-dark">Your Products</h3>
+        <a href="{% url 'add_product' %}" class="bg-brown text-white px-4 py-2 rounded-md hover:bg-mahogany transition">
             + Add Product
         </a>
     </div>
 
-    <ul class="space-y-4">
-        {% for product in products %}
-            <li class="bg-white p-4 rounded shadow border border-sand">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold text-charcoal">{{ product.name }}</p>
-                        <p class="text-sm text-gray-600">Price: ₹{{ product.price }}</p>
-                        <p class="text-sm text-gray-600">Stock: {{ product.stock }}</p>
-                    </div>
-                    <div class="space-x-3">
-                        <a href="{% url 'edit_product' product.pk %}"
-                           class="text-blue-600 hover:underline font-medium">Edit</a>
-                        <a href="{% url 'delete_product' product.pk %}"
-                           class="text-red-600 hover:underline font-medium">Delete</a>
+    {% if products %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for product in products %}
+                <div class="bg-white rounded-xl shadow border border-sand overflow-hidden flex flex-col">
+                    {% if product.images.all %}
+                        <div class="w-full aspect-square overflow-hidden cursor-pointer"
+                             onclick="openModal('{{ product.images.first.image_path.url }}')">
+                            <img src="{{ product.images.first.image_path.url }}" alt="{{ product.name }}"
+                                 class="w-full h-full object-cover transition-transform duration-200 hover:scale-105">
+                        </div>
+                    {% else %}
+                        <div class="w-full aspect-square flex items-center justify-center bg-gray-100 text-gray-500 text-sm">
+                            No Image
+                        </div>
+                    {% endif %}
+
+                    <div class="p-4 flex-grow flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-lg font-semibold text-charcoal mb-1">{{ product.name }}</h4>
+                            <p class="text-sm text-gray-600 mb-1">₹{{ product.price }}</p>
+                            <p class="text-sm text-gray-600 mb-1">Stock: {{ product.stock }}</p>
+
+                            {% if product.is_approved %}
+                                <span class="text-green-600 text-sm font-medium">Approved</span>
+                            {% else %}
+                                <span class="text-red-600 text-sm font-medium">Pending Approval</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex justify-between text-sm mt-4">
+                            <a href="{% url 'edit_product' product.pk %}" class="text-blue-600 hover:underline">Edit</a>
+                            <a href="{% url 'delete_product' product.pk %}" class="text-red-600 hover:underline">Delete</a>
+                        </div>
                     </div>
                 </div>
-            </li>
-        {% empty %}
-            <li class="text-gray-500 text-center py-8">
-                You haven't added any products yet. <br>
-                <a href="{% url 'add_product' %}" class="text-brown hover:underline font-medium">
-                    Click here to add your first.
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center text-gray-500 py-10">
+            <p>You haven't added any products yet.</p>
+            <a href="{% url 'add_product' %}" class="text-brown hover:underline font-medium">
+                Click here to add your first.
+            </a>
+        </div>
+    {% endif %}
 </div>
+
+<!-- Modal -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+    <span class="absolute top-5 right-5 text-white text-3xl cursor-pointer" onclick="closeModal()">&times;</span>
+    <img id="modalImage" src="" class="max-w-full max-h-[90vh] rounded-lg border-4 border-white shadow-lg" alt="Preview">
+</div>
+
+<script>
+    function openModal(imageUrl) {
+        const modal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("modalImage");
+        modalImg.src = imageUrl;
+        modal.classList.remove("hidden");
+    }
+
+    function closeModal() {
+        document.getElementById("imageModal").classList.add("hidden");
+    }
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeModal();
+    });
+</script>
 {% endblock %}
+

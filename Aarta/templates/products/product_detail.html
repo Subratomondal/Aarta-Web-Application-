@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Image Preview -->
+        <div class="w-full aspect-square bg-gray-100 rounded overflow-hidden">
+            {% if product.images.first %}
+                <img src="{{ product.images.first.image_path.url }}" alt="{{ product.name }}"
+                     class="w-full h-full object-cover">
+            {% else %}
+                <div class="flex items-center justify-center h-full text-gray-500">No Image</div>
+            {% endif %}
+        </div>
+
+        <!-- Product Info -->
+        <div>
+            <h1 class="text-3xl font-bold text-brown mb-2">{{ product.name }}</h1>
+            <p class="text-xl text-dark mb-4">₹{{ product.price }}</p>
+            <p class="text-sm text-gray-700 mb-6">{{ product.description }}</p>
+
+            <p class="text-sm text-gray-600 mb-1"><strong>Category:</strong> {{ product.category }}</p>
+            <p class="text-sm text-gray-600 mb-1"><strong>Stock:</strong> {{ product.stock }}</p>
+            <p class="text-sm text-gray-600"><strong>Location:</strong> {{ product.location }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
