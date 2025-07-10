@@ -57,3 +57,7 @@ def artisan_dashboard(request):
 
 from django.shortcuts import render, redirect
 
+@login_required
+def buyer_dashboard(request):
+    return render(request, 'users/buyer_dashboard.html')
+

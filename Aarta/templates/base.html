@@ -51,19 +51,20 @@
                 <a href="/" class="text-dark hover:text-brown transition">Home</a>
                 <a href="/products/" class="text-dark hover:text-brown transition">Products</a>
 
-                {% if user.is_authenticated %}
-                    {% if user.is_artisan %}
-                        <a href="{% url 'artisan_dashboard' %}" class="text-dark hover:text-brown transition">Artisan Dashboard</a>
+                    {% if user.is_authenticated %}
+                        {% if user.is_artisan %}
+                            <a href="{% url 'artisan_dashboard' %}" class="text-dark hover:text-brown transition">Artisan Dashboard</a>
+                        {% else %}
+                            <a href="{% url 'buyer_dashboard' %}" class="text-dark hover:text-brown transition">Dashboard</a>
+                        {% endif %}
+                        <span class="text-dark">Hi, {{ user.username }}!</span>
+                        <a href="{% url 'logout' %}" class="text-dark hover:text-brown transition">Logout</a>
                     {% else %}
-                        <a href="/users/dashboard/" class="text-dark hover:text-brown transition">Dashboard</a>
-                    {% endif %}
-                    <span class="text-dark">Hi, {{ user.username }}!</span>
-                    <a href="/users/logout/" class="text-dark hover:text-brown transition">Logout</a>
-                {% else %}
-                    <a href="/users/login/" class="text-dark hover:text-brown transition">Login</a>
-                    <a href="/users/register/" class="bg-brown text-white px-3 py-1 rounded hover:bg-mahogany transition">Register</a>
-                {% endif %}
-            </nav>
+                <a href="{% url 'login' %}" class="text-dark hover:text-brown transition">Login</a>
+                <a href="{% url 'register' %}" class="bg-brown text-white px-3 py-1 rounded hover:bg-mahogany transition">Register</a>
+            {% endif %}
+        </nav>
+
         </div>
     </header>
 

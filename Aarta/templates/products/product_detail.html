@@ -23,6 +23,30 @@
             <p class="text-sm text-gray-600 mb-1"><strong>Category:</strong> {{ product.category }}</p>
             <p class="text-sm text-gray-600 mb-1"><strong>Stock:</strong> {{ product.stock }}</p>
             <p class="text-sm text-gray-600"><strong>Location:</strong> {{ product.location }}</p>
+
+            {% if product.stock > 0 %}
+                {% if user.is_authenticated and not user.is_artisan %}
+                    <form method="POST" action="{% url 'add_to_cart' product.id %}" class="mt-6 space-y-3">
+                        {% csrf_token %}
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                            <input type="number" name="quantity" id="quantity"
+                                   min="1" max="{{ product.stock }}" value="1"
+                                   class="w-24 border border-sand rounded px-2 py-1">
+                        </div>
+                        <button type="submit"
+                                class="bg-brown text-white px-6 py-2 rounded hover:bg-mahogany transition">
+                            Add to Cart
+                        </button>
+                    </form>
+                {% elif not user.is_authenticated %}
+                    <p class="mt-6 text-sm text-gray-600">
+                        <a href="{% url 'login' %}" class="text-brown hover:underline">Login</a> to add this product to your cart.
+                    </p>
+                {% endif %}
+            {% else %}
+                <p class="mt-6 text-red-600 font-semibold">This product is currently out of stock.</p>
+            {% endif %}
         </div>
     </div>
 </div>
