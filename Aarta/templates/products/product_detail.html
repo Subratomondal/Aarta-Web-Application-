@@ -2,51 +2,63 @@
 {% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-10">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Image Preview -->
-        <div class="w-full aspect-square bg-gray-100 rounded overflow-hidden">
-            {% if product.images.first %}
-                <img src="{{ product.images.first.image_path.url }}" alt="{{ product.name }}"
-                     class="w-full h-full object-cover">
-            {% else %}
-                <div class="flex items-center justify-center h-full text-gray-500">No Image</div>
-            {% endif %}
+<div class="max-w-6xl mx-auto px-4 py-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <!-- Image Section -->
+        <div class="w-full">
+            <div class="w-full rounded-xl overflow-hidden bg-gray-100 aspect-square">
+                {% if product.images.first %}
+                    <img src="{{ product.images.first.image_path.url }}"
+                         alt="{{ product.name }}"
+                         class="w-full h-full object-contain p-4">
+                {% else %}
+                    <div class="h-full w-full flex items-center justify-center text-gray-500 text-sm">
+                        No Image Available
+                    </div>
+                {% endif %}
+            </div>
         </div>
 
-        <!-- Product Info -->
-        <div>
-            <h1 class="text-3xl font-bold text-brown mb-2">{{ product.name }}</h1>
-            <p class="text-xl text-dark mb-4">₹{{ product.price }}</p>
-            <p class="text-sm text-gray-700 mb-6">{{ product.description }}</p>
+        <!-- Product Details -->
+        <div class="flex flex-col justify-between">
+            <div>
+                <h1 class="text-4xl font-bold text-brown mb-2">{{ product.name }}</h1>
+                <p class="text-2xl text-dark font-semibold mb-4">₹{{ product.price }}</p>
+                <p class="text-gray-700 text-base mb-6">{{ product.description }}</p>
 
-            <p class="text-sm text-gray-600 mb-1"><strong>Category:</strong> {{ product.category }}</p>
-            <p class="text-sm text-gray-600 mb-1"><strong>Stock:</strong> {{ product.stock }}</p>
-            <p class="text-sm text-gray-600"><strong>Location:</strong> {{ product.location }}</p>
+                <div class="space-y-1 text-sm text-gray-600">
+                    <p><strong>Category:</strong> {{ product.category }}</p>
+                    <p><strong>Stock:</strong> {{ product.stock }}</p>
+                    <p><strong>Location:</strong> {{ product.location }}</p>
+                </div>
+            </div>
 
-            {% if product.stock > 0 %}
-                {% if user.is_authenticated and not user.is_artisan %}
-                    <form method="POST" action="{% url 'add_to_cart' product.id %}" class="mt-6 space-y-3">
-                        {% csrf_token %}
-                        <div>
-                            <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
-                            <input type="number" name="quantity" id="quantity"
-                                   min="1" max="{{ product.stock }}" value="1"
-                                   class="w-24 border border-sand rounded px-2 py-1">
-                        </div>
-                        <button type="submit"
-                                class="bg-brown text-white px-6 py-2 rounded hover:bg-mahogany transition">
-                            Add to Cart
-                        </button>
-                    </form>
-                {% elif not user.is_authenticated %}
-                    <p class="mt-6 text-sm text-gray-600">
-                        <a href="{% url 'login' %}" class="text-brown hover:underline">Login</a> to add this product to your cart.
-                    </p>
+            <!-- Cart Action -->
+            <div class="mt-8">
+                {% if product.stock > 0 %}
+                    {% if user.is_authenticated and not user.is_artisan %}
+                        <form method="POST" action="{% url 'add_to_cart' product.id %}" class="space-y-4">
+                            {% csrf_token %}
+                            <div>
+                                <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                                <input type="number" name="quantity" id="quantity"
+                                       min="1" max="{{ product.stock }}" value="1"
+                                       class="w-24 border border-sand rounded px-3 py-2 text-sm">
+                            </div>
+                            <button type="submit"
+                                    class="w-full md:w-auto inline-block bg-brown text-white px-6 py-2 rounded-xl hover:bg-mahogany transition">
+                                Add to Cart
+                            </button>
+                        </form>
+                    {% elif not user.is_authenticated %}
+                        <p class="text-sm text-gray-600 mt-4">
+                            <a href="{% url 'login' %}" class="text-brown font-medium hover:underline">Login</a> to add this product to your cart.
+                        </p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-red-600 font-semibold text-sm mt-6">This product is currently out of stock.</p>
                 {% endif %}
-            {% else %}
-                <p class="mt-6 text-red-600 font-semibold">This product is currently out of stock.</p>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>
