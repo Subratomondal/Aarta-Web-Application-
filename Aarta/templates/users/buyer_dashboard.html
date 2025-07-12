@@ -2,33 +2,62 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 py-10">
-    <h2 class="text-3xl font-bold text-brown mb-6">Welcome, {{ user.username }}!</h2>
+<div class="max-w-6xl mx-auto px-4 py-12">
+  <h2 class="text-4xl font-bold text-brown mb-10 text-center">Welcome, {{ user.username }}!</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-        <!-- My Orders Card -->
-        <div class="bg-white border border-sand shadow rounded-lg p-6">
-            <h3 class="text-xl font-semibold text-dark mb-2">My Orders</h3>
-            <p class="text-gray-600 mb-4">Check your order history and status.</p>
-            <a href="{% url 'my_orders' %}" class="text-brown hover:underline font-medium">View Orders →</a>
+    <!-- My Orders -->
+    <div class="bg-[#FFF8F3] border border-sand p-6 rounded-2xl shadow-md hover:shadow-lg transition group">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="bg-brown text-cream p-3 rounded-full group-hover:scale-105 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 3h18M9 3v18m6-18v18M3 9h18M3 15h18"></path>
+          </svg>
         </div>
-
-        <!-- Cart Overview Card -->
-        <div class="bg-white border border-sand shadow rounded-lg p-6">
-            <h3 class="text-xl font-semibold text-dark mb-2">My Cart</h3>
-            <p class="text-gray-600 mb-4">View and manage your shopping cart.</p>
-            <a href="{% url 'view_cart' %}" class="text-brown hover:underline font-medium">Go to Cart →</a>
-        </div>
-
-        <!-- Optional future features like profile settings -->
-        <!--
-        <div class="bg-white border border-sand shadow rounded-lg p-6">
-            <h3 class="text-xl font-semibold text-dark mb-2">Account Settings</h3>
-            <p class="text-gray-600 mb-4">Update your profile and preferences.</p>
-            <a href="#" class="text-brown hover:underline font-medium">Manage Account →</a>
-        </div>
-        -->
+        <h3 class="text-2xl font-semibold text-charcoal">My Orders</h3>
+      </div>
+      <p class="text-gray-600 mb-4">View your order history, track deliveries, and manage returns.</p>
+      <a href="{% url 'my_orders' %}" class="text-brown font-medium hover:underline">
+        View Orders →
+      </a>
     </div>
+
+    <!-- My Cart -->
+    <div class="bg-[#FFF8F3] border border-sand p-6 rounded-2xl shadow-md hover:shadow-lg transition group">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="bg-brown text-cream p-3 rounded-full group-hover:scale-105 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7h11L17 13M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-semibold text-charcoal">My Cart</h3>
+      </div>
+      <p class="text-gray-600 mb-4">View items you’ve added and proceed to checkout when ready.</p>
+      <a href="{% url 'view_cart' %}" class="text-brown font-medium hover:underline">
+        Go to Cart →
+      </a>
+    </div>
+
+    <!-- Future Feature (Optional) -->
+    <!--
+    <div class="bg-white border border-sand p-6 rounded-2xl shadow group">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="bg-charcoal text-cream p-3 rounded-full group-hover:scale-105 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M5.121 17.804A9.969 9.969 0 0112 15c2.485 0 4.77.912 6.879 2.416M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-semibold text-charcoal">Account Settings</h3>
+      </div>
+      <p class="text-gray-600 mb-4">Update your profile and manage preferences.</p>
+      <a href="#" class="text-brown font-medium hover:underline">Manage Account →</a>
+    </div>
+    -->
+
+  </div>
 </div>
 {% endblock %}

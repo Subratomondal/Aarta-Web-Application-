@@ -1,10 +1,24 @@
 {% extends 'base.html' %}
 {% block title %}Order Successful{% endblock %}
+
 {% block content %}
-<div class="max-w-2xl mx-auto py-10 px-4 text-center">
-    <h2 class="text-3xl font-bold text-green-600 mb-4">Thank you for your order!</h2>
-    <p class="text-gray-700">Order #{{ order.id }} has been placed successfully.</p>
-    <a href="/" class="inline-block mt-6 px-6 py-2 bg-brown text-white rounded hover:bg-mahogany transition">
+<div class="max-w-2xl mx-auto py-16 px-6 text-center bg-white border border-sand rounded-xl shadow">
+
+    <!-- Icon -->
+    <div class="flex justify-center mb-6">
+        <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"></path>
+        </svg>
+    </div>
+
+    <!-- Heading -->
+    <h2 class="text-3xl font-bold text-green-600 mb-3">Thank you for your order!</h2>
+
+    <!-- Details -->
+    <p class="text-gray-700 text-base">Your order <span class="font-semibold text-charcoal">#{{ order.id }}</span> has been placed successfully.</p>
+
+    <!-- Button -->
+    <a href="{% url 'product_gallery' %}" class="inline-block mt-8 px-6 py-3 bg-brown text-white rounded-lg hover:bg-mahogany transition">
         Continue Shopping
     </a>
 </div>

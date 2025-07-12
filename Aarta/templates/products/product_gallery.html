@@ -2,17 +2,21 @@
 {% block title %}Explore Products{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-6">
-    <h2 class="text-3xl font-bold mb-6 text-brown text-center">Explore Handmade Creations</h2>
+<div class="max-w-7xl mx-auto px-4 py-10">
+    <h2 class="text-3xl md:text-4xl font-serif font-bold text-center text-charcoal mb-10">
+        Explore <span class="text-[#AB531F]">Handmade</span> Creations
+    </h2>
 
     {% if products %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {% for product in products %}
-                <a href="{% url 'product_detail' product.pk %}" class="block bg-white rounded-xl shadow border border-sand overflow-hidden hover:shadow-lg transition duration-300">
+                <a href="{% url 'product_detail' product.pk %}" class="group block bg-white rounded-xl overflow-hidden border border-sand shadow-sm hover:shadow-md transition duration-300">
+
+                    <!-- Product Image -->
                     {% if product.images.first %}
-                        <div class="w-full aspect-square overflow-hidden">
+                        <div class="aspect-square overflow-hidden">
                             <img src="{{ product.images.first.image_path.url }}" alt="{{ product.name }}"
-                                 class="w-full h-full object-cover">
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         </div>
                     {% else %}
                         <div class="w-full aspect-square flex items-center justify-center bg-gray-100 text-gray-500 text-sm">
@@ -20,19 +24,21 @@
                         </div>
                     {% endif %}
 
-                    <div class="p-4">
-                        <h4 class="text-lg font-semibold text-charcoal mb-1">{{ product.name }}</h4>
-                        <p class="text-sm text-gray-600">₹{{ product.price }}</p>
-                        <p class="text-sm text-gray-600">Stock: {{ product.stock }}</p>
-                        <p class="text-sm text-gray-600">From: {{ product.location }}</p>
+                    <!-- Product Info -->
+                    <div class="p-3">
+                        <h4 class="text-base font-semibold text-charcoal truncate mb-1">{{ product.name }}</h4>
+                        <p class="text-sm text-brown font-semibold mb-1">₹{{ product.price }}</p>
+                        <p class="text-xs text-charcoal/70">Stock: {{ product.stock }}</p>
+                        <p class="text-xs text-charcoal/60">From: {{ product.location }}</p>
                     </div>
                 </a>
             {% endfor %}
         </div>
     {% else %}
-        <div class="text-center text-gray-500 py-10">
-            No products available right now.
+        <div class="text-center text-gray-500 py-20 text-lg">
+            No products available right now. Please check back soon.
         </div>
     {% endif %}
 </div>
 {% endblock %}
+

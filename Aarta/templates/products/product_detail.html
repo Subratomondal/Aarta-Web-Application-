@@ -2,61 +2,70 @@
 {% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-10">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <!-- Image Section -->
-        <div class="w-full">
-            <div class="w-full rounded-xl overflow-hidden bg-gray-100 aspect-square">
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+
+        <!-- Product Image -->
+        <div>
+            <div class="w-full rounded-2xl overflow-hidden bg-gray-100 aspect-square shadow">
                 {% if product.images.first %}
                     <img src="{{ product.images.first.image_path.url }}"
                          alt="{{ product.name }}"
                          class="w-full h-full object-contain p-4">
                 {% else %}
-                    <div class="h-full w-full flex items-center justify-center text-gray-500 text-sm">
+                    <div class="h-full w-full flex items-center justify-center text-gray-500 text-base">
                         No Image Available
                     </div>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Product Details -->
-        <div class="flex flex-col justify-between">
+        <!-- Product Info -->
+        <div class="flex flex-col justify-between text-[17px] md:text-[18px] text-charcoal leading-relaxed">
             <div>
-                <h1 class="text-4xl font-bold text-brown mb-2">{{ product.name }}</h1>
-                <p class="text-2xl text-dark font-semibold mb-4">₹{{ product.price }}</p>
-                <p class="text-gray-700 text-base mb-6">{{ product.description }}</p>
+                <h1 class="text-4xl md:text-5xl font-serif font-bold mb-4 text-[#222222]">{{ product.name }}</h1>
 
-                <div class="space-y-1 text-sm text-gray-600">
-                    <p><strong>Category:</strong> {{ product.category }}</p>
-                    <p><strong>Stock:</strong> {{ product.stock }}</p>
-                    <p><strong>Location:</strong> {{ product.location }}</p>
-                </div>
+                <p class="text-2xl md:text-3xl font-semibold text-[#AB531F] mb-6">₹{{ product.price }}</p>
+
+                <p class="text-lg text-gray-700 mb-8">
+                    {{ product.description|default:"A handcrafted creation that reflects timeless artistry. Perfect for adding charm, character, and craftsmanship to your space or collection." }}
+                </p>
+
+                <ul class="space-y-2 text-base text-gray-800">
+                    <li><strong>Category:</strong> {{ product.category.name }}</li>
+                    <li><strong>In Stock:</strong> {{ product.stock }}</li>
+                    <li><strong>Ships From:</strong> {{ product.location }}</li>
+                    <li><strong>Crafted By:</strong> {{ product.artisan.user.get_full_name|default:product.artisan.user.username }}</li>
+                </ul>
             </div>
 
-            <!-- Cart Action -->
-            <div class="mt-8">
+            <!-- Add to Cart -->
+            <div class="mt-10">
                 {% if product.stock > 0 %}
                     {% if user.is_authenticated and not user.is_artisan %}
                         <form method="POST" action="{% url 'add_to_cart' product.id %}" class="space-y-4">
                             {% csrf_token %}
                             <div>
-                                <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                                <label for="quantity" class="block text-base font-medium text-gray-700 mb-1">Quantity</label>
                                 <input type="number" name="quantity" id="quantity"
                                        min="1" max="{{ product.stock }}" value="1"
-                                       class="w-24 border border-sand rounded px-3 py-2 text-sm">
+                                       class="w-24 border border-sand rounded px-3 py-2 text-base">
                             </div>
                             <button type="submit"
-                                    class="w-full md:w-auto inline-block bg-brown text-white px-6 py-2 rounded-xl hover:bg-mahogany transition">
+                                    class="mt-4 bg-brown text-white px-8 py-3 rounded-xl hover:bg-mahogany transition text-lg font-medium">
                                 Add to Cart
                             </button>
                         </form>
+                        <p class="text-sm text-gray-500 mt-3 italic">
+                            Handcrafted with care. Slight variations are a beautiful reminder of its uniqueness.
+                        </p>
                     {% elif not user.is_authenticated %}
-                        <p class="text-sm text-gray-600 mt-4">
-                            <a href="{% url 'login' %}" class="text-brown font-medium hover:underline">Login</a> to add this product to your cart.
+                        <p class="text-base text-gray-600 mt-4">
+                            <a href="{% url 'login' %}" class="text-brown font-semibold hover:underline">Login</a> to add this item to your cart.
                         </p>
                     {% endif %}
                 {% else %}
-                    <p class="text-red-600 font-semibold text-sm mt-6">This product is currently out of stock.</p>
+                    <p class="text-red-600 text-lg font-semibold mt-6">This product is currently out of stock.</p>
                 {% endif %}
             </div>
         </div>

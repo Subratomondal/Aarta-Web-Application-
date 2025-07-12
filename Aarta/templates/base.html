@@ -5,13 +5,12 @@
     <title>{% block title %}Aarta – Spirit-woven Creations{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Custom Tailwind Configuration for Theme Colors -->
+    <!-- Tailwind Theme Config -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-
                         cream: '#F9F3EC',
                         peach: '#F8E2C4',
                         sand: '#E5CCAB',
@@ -24,117 +23,148 @@
                     fontFamily: {
                         display: ['Playfair Display', 'serif'],
                         body: ['Inter', 'sans-serif']
+                    },
+                    transitionDuration: {
+                        DEFAULT: '250ms'
                     }
                 }
             }
         }
     </script>
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
 </head>
 
 <body class="font-body bg-cream text-dark">
 
-    {% load static %}
+{% load static %}
 
-    <!-- Header -->
-    <header class="bg-peach shadow-sm py-5">
-        <div class="container mx-auto flex items-center justify-between px-4">
-            <!-- Logo and Site Name -->
-            <div class="flex items-center space-x-3">
-                <img src="{% static 'image/logo-removebg-preview.png' %}" alt="CraftNest Logo" class="h-10 w-auto">
-            </div>
+<!-- Header -->
+<header class="bg-peach shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3">
+            <img src="{% static 'image/logo-removebg-preview.png' %}" alt="Aarta Logo" class="h-10 w-auto">
+        </div>
 
-            <!-- Navigation Links -->
-            <nav class="space-x-6 text-sm font-medium">
-                <a href="/" class="text-dark hover:text-brown transition">Home</a>
-                <a href="{% url 'product_gallery' %}" class="text-dark hover:text-brown transition">Explore</a>
+        <!-- Navigation -->
+        <nav class="space-x-6 text-sm font-medium hidden md:flex items-center">
+            <a href="/" class="text-dark hover:text-brown transition">Home</a>
+            <a href="{% url 'product_gallery' %}" class="text-dark hover:text-brown transition">Explore</a>
 
-                    {% if user.is_authenticated %}
-                        {% if user.is_artisan %}
-                            <a href="{% url 'artisan_dashboard' %}" class="text-dark hover:text-brown transition">Artisan Dashboard</a>
-                        {% else %}
-                            <a href="{% url 'buyer_dashboard' %}" class="text-dark hover:text-brown transition">Dashboard</a>
+            {% if user.is_authenticated %}
+                {% if user.is_artisan %}
+                    <a href="{% url 'artisan_dashboard' %}" class="text-dark hover:text-brown transition">Dashboard</a>
+                {% else %}
+                    <a href="{% url 'buyer_dashboard' %}" class="text-dark hover:text-brown transition">Dashboard</a>
+
+                    <!-- Cart Icon for Buyer -->
+                    <a href="{% url 'view_cart' %}" class="relative text-dark hover:text-brown transition inline-flex items-center">
+                        <!-- New Cart Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M2.25 3h1.664a.75.75 0 01.728.574L5.857 6H20.25a.75.75 0 01.716.976l-2.25 7.5a.75.75 0 01-.716.524H8.292a.75.75 0 01-.728-.574L5.107 7.5H3.25a.75.75 0 010-1.5h1.356L3.572 3.574A.75.75 0 013.25 3H2.25a.75.75 0 010-1.5h1.5a.75.75 0 01.728.574L5.857 6H6a.75.75 0 010 1.5h-.857l2.208 7.5h10.875l2.25-7.5H6.643L5.572 3.574A.75.75 0 015 3H2.25z"></path>
+                            <circle cx="9" cy="21" r="1.5"></circle>
+                            <circle cx="17" cy="21" r="1.5"></circle>
+                        </svg>
+
+                        {% if cart_item_count > 0 %}
+                        <span class="absolute -top-2 -right-3 text-xs bg-red-600 text-white rounded-full px-1.5">
+                            {{ cart_item_count }}
+                        </span>
                         {% endif %}
-                        <span class="text-dark">Hi, {{ user.username }}!</span>
-                        <a href="{% url 'logout' %}" class="text-dark hover:text-brown transition">Logout</a>
-                    {% else %}
+                    </a>
+
+                {% endif %}
+                <span class="text-dark">Hi, {{ user.username }}!</span>
+                <a href="{% url 'logout' %}" class="text-dark hover:text-brown transition">Logout</a>
+            {% else %}
                 <a href="{% url 'login' %}" class="text-dark hover:text-brown transition">Login</a>
-                <a href="{% url 'register' %}" class="bg-brown text-white px-3 py-1 rounded hover:bg-mahogany transition">Register</a>
+                <a href="{% url 'register' %}"
+                   class="bg-brown text-white px-4 py-2 rounded hover:bg-mahogany transition shadow-md">
+                    Register
+                </a>
             {% endif %}
         </nav>
 
-        </div>
-    </header>
+    </div>
+</header>
 
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto py-12 px-4">
+    {% block content %}{% endblock %}
+</main>
 
+<!-- Footer -->
+<footer class="bg-charcoal text-cream py-16">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+        <!-- About -->
+        <div>
+            <img src="{% static 'image/logo-removebg-preview.png' %}" alt="Aarta Logo" class="h-12 mb-4">
+            <p class="text-cream/70 mb-4 leading-relaxed">
+                Where creativity meets commerce. Empowering artists and connecting them with art lovers worldwide.
+            </p>
+            <div class="flex space-x-4 mt-4">
+                <!-- Instagram -->
+                <a href="javascript:void(0);" aria-label="Instagram" class="cursor-not-allowed opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="h-5 w-5 text-cream" viewBox="0 0 24 24">
+                        <path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 2 .3 2.5.5.6.2 1 .5 1.5 1s.8.9 1 1.5c.2.5.4 1.3.5 2.5.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 2-.5 2.5-.2.6-.5 1-.9 1.5s-.9.8-1.5 1c-.5.2-1.3.4-2.5.5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-2-.3-2.5-.5a3.6 3.6 0 0 1-1.5-1 3.6 3.6 0 0 1-1-1.5c-.2-.5-.4-1.3-.5-2.5-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.3-2 .5-2.5a3.6 3.6 0 0 1 1-1.5 3.6 3.6 0 0 1 1.5-1c.5-.2 1.3-.4 2.5-.5 1.3-.1 1.7-.1 4.9-.1zm0-2.2C8.8 0 8.3 0 7 .1c-1.4.1-2.5.3-3.4.6a5.7 5.7 0 0 0-2.1 1.3 5.7 5.7 0 0 0-1.3 2.1C.3 4 0 5.1.1 6.5.2 8 0 8.6 0 12s.2 4 .1 5.5c.1 1.4.3 2.5.6 3.4.3.9.8 1.6 1.3 2.1a5.7 5.7 0 0 0 2.1 1.3c.9.3 2 .5 3.4.6 1.5.1 2 .1 5.5.1s4 0 5.5-.1c1.4-.1 2.5-.3 3.4-.6a5.7 5.7 0 0 0 2.1-1.3 5.7 5.7 0 0 0 1.3-2.1c.3-.9.5-2 .6-3.4.1-1.5.1-2 .1-5.5s0-4-.1-5.5c-.1-1.4-.3-2.5-.6-3.4a5.7 5.7 0 0 0-1.3-2.1 5.7 5.7 0 0 0-2.1-1.3c-.9-.3-2-.5-3.4-.6C15.7 0 15.2 0 12 0z"></path>
+                        <path d="M12 5.8A6.2 6.2 0 1 0 12 18.2 6.2 6.2 0 0 0 12 5.8zm0 10.2a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.6a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"></path>
+                    </svg>
+                </a>
 
-    <!-- Main Content -->
-    <main class="container mx-auto py-12 px-4">
-        {% block content %}{% endblock %}
-    </main>
+                <!-- Twitter -->
+                <a href="javascript:void(0);" aria-label="Twitter" class="cursor-not-allowed opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="h-5 w-5 text-cream" viewBox="0 0 24 24">
+                        <path d="M24 4.56c-.89.39-1.85.66-2.84.78a4.93 4.93 0 0 0 2.15-2.71c-.94.56-1.98.97-3.09 1.19a4.92 4.92 0 0 0-8.38 4.48A13.96 13.96 0 0 1 1.67 3.15a4.92 4.92 0 0 0 1.52 6.57c-.8-.02-1.55-.25-2.2-.61v.06c0 2.4 1.7 4.4 3.95 4.85a4.95 4.95 0 0 1-2.2.08 4.93 4.93 0 0 0 4.6 3.42A9.87 9.87 0 0 1 0 19.54a13.94 13.94 0 0 0 7.55 2.21c9.05 0 14-7.5 14-14v-.64A10.02 10.02 0 0 0 24 4.56z"></path>
+                    </svg>
+                </a>
 
-    <!-- Footer -->
-    <footer class="bg-charcoal text-cream py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8 mb-8">
-                <div class="col-span-2 md:col-span-1">
-                    <div class="mb-4">
-                        <img src="{% static 'image/logo-removebg-preview.png' %}" alt="ArtisanMarket Logo" class="h-12">
-                    </div>
-                    <p class="text-cream/70 mb-4">
-                        Where creativity meets commerce. Empowering artists and connecting them with art lovers worldwide.
-                    </p>
-                    <div class="flex space-x-4">
-                        <!-- Social Icons -->
-                        <!-- [SVGs you provided] -->
-                        <!-- Keep all your social SVGs here unchanged -->
-                    </div>
-                </div>
-
-                <!-- Column 2 -->
-                <div>
-                    <h3 class="font-serif font-bold mb-4">For Artisans</h3>
-                    <ul class="space-y-2 text-cream/70">
-                        <li><a href="/users/register/" class="hover:text-cream transition-colors">Join as Seller</a></li>
-                        <li><a href="#" class="hover:text-cream transition-colors">Seller Guidelines</a></li>
-                        <li><a href="#" class="hover:text-cream transition-colors">Commission Rates</a></li>
-                        <li><a href="#" class="hover:text-cream transition-colors">Success Stories</a></li>
-                    </ul>
-                </div>
-
-                <!-- Column 3 -->
-                <div>
-                    <h3 class="font-serif font-bold mb-4">For Buyers</h3>
-                    <ul class="space-y-2 text-cream/70">
-                        <li><a href="#" class="hover:text-cream transition-colors">Browse Art</a></li>
-                        <li><a href="#" class="hover:text-cream transition-colors">Custom Orders</a></li>
-                        <li><a href="#" class="hover:text-cream transition-colors">Gift Cards</a></li>
-                        <li><a href="#" class="hover:text-cream transition-colors">Shipping Info</a></li>
-                    </ul>
-                </div>
-
-                <!-- Column 4 -->
-                <div>
-                    <h3 class="font-serif font-bold mb-4">Support</h3>
-                    <ul class="space-y-2 text-cream/70">
-                        <li><a href="#" class="hover:text-cream transition-colors">Help Center</a></li>
-                        <li><a href="#" class="hover:text-cream transition-colors">Contact Us</a></li>
-                        <li><a href="#" class="hover:text-cream transition-colors">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:text-cream transition-colors">Terms of Service</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Bottom Note -->
-            <div class="border-t border-cream/20 pt-8 text-center text-cream/70">
-                <p>&copy; 2025 Aarta. All rights reserved. Made with ❤️ for artists and art lovers.</p>
+                <!-- Facebook -->
+                <a href="javascript:void(0);" aria-label="Facebook" class="cursor-not-allowed opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="h-5 w-5 text-cream" viewBox="0 0 24 24">
+                        <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.658-4.788 1.325 0 2.464.099 2.795.143v3.24l-1.918.001c-1.504 0-1.794.715-1.794 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.324-.593 1.324-1.324V1.325C24 .593 23.407 0 22.675 0z"></path>
+                    </svg>
+                </a>
             </div>
         </div>
-    </footer>
 
+        <!-- For Artisans -->
+        <div>
+            <h3 class="font-display text-lg font-semibold mb-4">For Artisans</h3>
+            <ul class="space-y-2 text-cream/70">
+                <li><a href="/users/register/" class="hover:text-cream transition">Join as Seller</a></li>
+                <li><a href="#" class="hover:text-cream transition">Seller Guidelines</a></li>
+                <li><a href="#" class="hover:text-cream transition">Commission Rates</a></li>
+                <li><a href="#" class="hover:text-cream transition">Success Stories</a></li>
+            </ul>
+        </div>
 
+        <!-- For Buyers -->
+        <div>
+            <h3 class="font-display text-lg font-semibold mb-4">For Buyers</h3>
+            <ul class="space-y-2 text-cream/70">
+                <li><a href="#" class="hover:text-cream transition">Browse Art</a></li>
+                <li><a href="#" class="hover:text-cream transition">Custom Orders</a></li>
+                <li><a href="#" class="hover:text-cream transition">Gift Cards</a></li>
+                <li><a href="#" class="hover:text-cream transition">Shipping Info</a></li>
+            </ul>
+        </div>
 
-</body>
-</html>
+        <!-- Support -->
+        <div>
+            <h3 class="font-display text-lg font-semibold mb-4">Support</h3>
+            <ul class="space-y-2 text-cream/70">
+                <li><a href="#" class="hover:text-cream transition">Help Center</a></li>
+                <li><a href="#" class="hover:text-cream transition">Contact Us</a></li>
+                <li><a href="#" class="hover:text-cream transition">Privacy Policy</a></li>
+                <li><a href="#" class="hover:text-cream transition">Terms of Service</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="mt-12 border-t border-cream/20 pt-6 text-center text-cream/70 text-sm">
+        <p>&copy; 2025 Aarta. All rights reserved. Made with ❤️ for artists and art lovers.</p>
+    </div>
+</footer>
