@@ -4,6 +4,10 @@ from .models import Product, ProductImage
 from users.models import ArtisanProfile
 from django.contrib.auth.decorators import login_required
 
+def home(request):
+    featured_products = Product.objects.filter(is_featured=True, is_approved=True)[:6]
+    return render(request, 'index.html', {'featured_products': featured_products})
+
 def product_gallery(request):
     products = Product.objects.filter(is_approved=True).order_by('-created_at')
     return render(request, 'products/product_gallery.html', {'products': products})
