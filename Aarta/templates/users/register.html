@@ -55,10 +55,18 @@
             {% endif %}
         </div>
 
-        <!-- Is Artisan -->
-        <div class="mb-6 flex items-center">
-            {{ form.is_artisan }}
-            <label for="id_is_artisan" class="ml-2 text-dark text-sm">I am an artisan</label>
+        <!-- Is Artisan Checkbox -->
+        <div class="mb-6">
+            <div class="flex items-start space-x-3">
+                <input type="checkbox" id="id_is_artisan" name="is_artisan" class="mt-1 h-5 w-5 text-brown border-gray-300 rounded"
+                       {% if form.is_artisan.value %}checked{% endif %}>
+                <label for="id_is_artisan" class="text-dark text-sm leading-5">
+                    I want to <strong>sell my handmade products</strong> on this platform as an artisan.
+                </label>
+            </div>
+            <p class="text-xs text-gray-600 mt-2 bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2">
+                By selecting this option, you'll get access to a seller dashboard where you can upload and manage your products.
+            </p>
         </div>
 
         <!-- Submit Button -->

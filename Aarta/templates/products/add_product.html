@@ -10,6 +10,12 @@
     <form method="post" enctype="multipart/form-data" class="space-y-5">
         {% csrf_token %}
 
+        {% if form.non_field_errors %}
+            <div class="text-sm text-red-600">
+                {{ form.non_field_errors.0 }}
+            </div>
+        {% endif %}
+
         {% for field in form %}
             <div>
                 <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-dark mb-1">
@@ -24,11 +30,13 @@
 
         <div>
             <label for="images" class="block text-sm font-medium text-dark mb-1">
-                Product Images
+                Product Images <span class="text-xs text-charcoal/60">(Max: 4)</span>
             </label>
             <input type="file" name="images" id="images" multiple
-                class="w-full border border-sand px-4 py-2 rounded-md bg-white/70 backdrop-blur-md focus:ring-brown focus:border-brown">
-            <p class="text-xs text-charcoal/70 mt-1">You can select multiple images</p>
+                class="w-full border border-sand px-4 py-2 rounded-md bg-white/70 backdrop-blur-md focus:ring-brown focus:border-brown"
+                onchange="checkImageLimit(this)">
+            <p class="text-xs text-charcoal/70 mt-1">You can select up to 4 images</p>
+            <p id="image-error" class="text-xs text-red-600 mt-1 hidden">You can only upload a maximum of 4 images.</p>
         </div>
 
         <button type="submit" class="w-full bg-brown text-white py-2 rounded-md hover:bg-mahogany transition">
@@ -36,5 +44,18 @@
         </button>
     </form>
 </div>
+
+<script>
+    function checkImageLimit(input) {
+        const error = document.getElementById('image-error');
+        if (input.files.length > 4) {
+            error.classList.remove('hidden');
+            input.value = ""; // Reset input
+        } else {
+            error.classList.add('hidden');
+        }
+    }
+</script>
 {% endblock %}
+
 

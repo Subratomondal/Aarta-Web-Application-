@@ -13,9 +13,21 @@
             <li class="bg-cream p-4 shadow rounded-xl border border-sand">
                 <div class="flex items-start justify-between">
                     <div class="flex space-x-4">
-                        <!-- Show first image if exists -->
+                        <!-- Show only 4 images -->
                         {% if product.images.all %}
-                            <img src="{{ product.images.first.image_path.url }}" alt="{{ product.name }}" class="w-24 h-24 object-cover rounded border border-sand">
+                            <div class="flex gap-2 overflow-x-auto max-w-xs relative">
+                                {% for img in product.images.all|slice:":4" %}
+                                    <img src="{{ img.image_path.url }}" alt="{{ product.name }}"
+                                         class="w-20 h-20 object-cover rounded border border-sand cursor-pointer hover:scale-105 transition-transform"
+                                         onclick="openModal('{{ img.image_path.url }}')">
+                                {% endfor %}
+                                {% if product.images.count > 4 %}
+                                    <div class="w-20 h-20 flex items-center justify-center bg-[#000000a0] text-white font-semibold text-sm rounded border border-sand cursor-pointer"
+                                         onclick="openModal('{{ product.images.all.4.image_path.url }}')">
+                                        +{{ product.images.count|add:"-4" }}
+                                    </div>
+                                {% endif %}
+                            </div>
                         {% else %}
                             <div class="w-24 h-24 flex items-center justify-center text-sm text-charcoal/50 bg-white border border-sand rounded">
                                 No Image
@@ -37,4 +49,26 @@
         {% endfor %}
     </ul>
 </div>
+
+<!-- Lightbox Modal -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+    <span class="absolute top-5 right-5 text-white text-3xl cursor-pointer" onclick="closeModal()">&times;</span>
+    <img id="modalImage" src="" class="max-w-full max-h-[90vh] rounded-lg border-4 border-white shadow-lg" alt="Preview">
+</div>
+
+<!-- Modal JS -->
+<script>
+    function openModal(imageUrl) {
+        document.getElementById("modalImage").src = imageUrl;
+        document.getElementById("imageModal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+        document.getElementById("imageModal").classList.add("hidden");
+    }
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeModal();
+    });
+</script>
 {% endblock %}

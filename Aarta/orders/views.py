@@ -1,3 +1,5 @@
+from django.db import transaction
+from django.db.models import F
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -46,8 +48,15 @@ def add_to_cart(request, product_id):
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user)
     total = sum(item.get_total_price() for item in cart_items)
-    return render(request, 'orders/cart.html', {'cart_items': cart_items, 'total': total})
 
+    # Check if any cart item exceeds available stock
+    insufficient_stock = any(item.quantity > item.product.stock for item in cart_items)
+
+    return render(request, 'orders/cart.html', {
+        'cart_items': cart_items,
+        'total': total,
+        'insufficient_stock': insufficient_stock
+    })
 
 @login_required
 def remove_from_cart(request, item_id):
@@ -58,30 +67,40 @@ def remove_from_cart(request, item_id):
 
 
 @login_required
+@transaction.atomic
 def place_order(request):
-    cart_items = CartItem.objects.filter(user=request.user)
+    cart_items = CartItem.objects.select_related('product').filter(user=request.user).select_for_update()
+
     if not cart_items:
         messages.error(request, "Your cart is empty.")
         return redirect('view_cart')
 
-    total = sum(item.get_total_price() for item in cart_items)
-
-    order = Order.objects.create(buyer=request.user, total_amount=total)
+    # Validate stock availability
     for item in cart_items:
+        if item.quantity > item.product.stock:
+            messages.error(request, f"Only {item.product.stock} unit(s) left for '{item.product.name}'. Please update your cart.")
+            return redirect('view_cart')
+
+    # Create Order
+    total = sum(item.get_total_price() for item in cart_items)
+    order = Order.objects.create(buyer=request.user, total_amount=total)
+
+    # Deduct stock and create OrderItems
+    for item in cart_items:
+        product = item.product
+        product.stock = F('stock') - item.quantity
+        product.save()
+
         OrderItem.objects.create(
             order=order,
-            product=item.product,
+            product=product,
             quantity=item.quantity,
-            price=item.product.price,
+            price=product.price
         )
-        # Reduce stock
-        item.product.stock -= item.quantity
-        item.product.save()
 
     cart_items.delete()
     messages.success(request, "Order placed successfully!")
 
-    # 🔽 Redirect to success page after order
     return redirect('order_success', order_id=order.id)
 
 @login_required

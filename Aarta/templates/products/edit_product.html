@@ -6,8 +6,14 @@
 {% block content %}
 <div class="max-w-xl mx-auto bg-peach/50 p-8 rounded-2xl shadow-lg border border-sand">
     <h2 class="text-2xl font-bold mb-6 text-center text-charcoal">Edit Product</h2>
-    <form method="post" class="space-y-5">
+
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
         {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <p class="text-sm text-red-600">{{ form.non_field_errors.0 }}</p>
+        {% endif %}
+
         {% for field in form %}
             <div>
                 <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-dark mb-1">
@@ -19,9 +25,62 @@
                 {% endif %}
             </div>
         {% endfor %}
+
+        <!-- Upload new images -->
+        <div>
+            <label for="images" class="block text-sm font-medium text-dark mb-1">
+                Add More Images (Max 4 in total)
+            </label>
+            <input type="file" name="images" id="images" multiple
+                   class="w-full border border-sand px-4 py-2 rounded-md bg-white/70"
+                   {% if remaining_uploads == 0 %} disabled {% endif %}
+                   onchange="checkImageLimit(this)">
+            <p class="text-xs text-charcoal/70 mt-1">
+                You can upload {{ remaining_uploads }} more image(s).
+            </p>
+            <p id="image-error" class="text-xs text-red-600 mt-1 hidden">
+                ⚠️ You can only have a maximum of 4 images.
+            </p>
+        </div>
+
+        <!-- Show existing images -->
+        {% if images %}
+        <div>
+            <label class="block text-sm font-medium text-dark mb-1">Existing Images</label>
+            <div class="grid grid-cols-3 gap-4">
+                {% for img in images %}
+                <div class="relative group">
+                    <img src="{{ img.image_path.url }}" class="w-full h-28 object-cover rounded border" alt="Product Image">
+                    <a href="{% url 'delete_product_image' img.id %}"
+                       class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700">
+                        ✕
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <button type="submit" class="w-full bg-brown text-white py-2 rounded-md hover:bg-mahogany transition">
             Save Changes
         </button>
     </form>
 </div>
+
+<!-- JS to prevent more than 4 total images -->
+<script>
+    function checkImageLimit(input) {
+        const maxImages = 4;
+        const currentCount = {{ images|length|default:0 }};
+        const selected = input.files.length;
+        const error = document.getElementById('image-error');
+
+        if (currentCount + selected > maxImages) {
+            error.classList.remove('hidden');
+            input.value = ""; // Clear file input
+        } else {
+            error.classList.add('hidden');
+        }
+    }
+</script>
 {% endblock %}

@@ -19,6 +19,7 @@
     <orderEntry type="jdk" jdkName="Python 3.13 (Aarta)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="chart.js" level="application" />
+    <orderEntry type="library" name="swiper" level="application" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />

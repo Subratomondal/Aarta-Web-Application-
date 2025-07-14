@@ -36,7 +36,9 @@ def add_product(request):
         form = ProductForm(request.POST)
         images = request.FILES.getlist('images')
 
-        if form.is_valid():
+        if len(images) > 4:
+            form.add_error(None, "You can upload a maximum of 4 images.")
+        elif form.is_valid():
             product = form.save(commit=False)
             product.artisan = artisan_profile
             product.save()
@@ -67,12 +69,37 @@ def edit_product(request, pk):
 
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
-        if form.is_valid():
+        images = request.FILES.getlist('images')
+        existing_images_count = product.images.count()
+
+        if existing_images_count + len(images) > 4:
+            form.add_error(None, f"You can only have up to 4 images in total. You already have {existing_images_count}.")
+        elif form.is_valid():
             form.save()
+            for image in images:
+                ProductImage.objects.create(product=product, image_path=image)
             return redirect('my_products')
     else:
         form = ProductForm(instance=product)
-    return render(request, 'products/edit_product.html', {'form': form})
+
+    images = product.images.all()
+    remaining_uploads = 4 - images.count()  # 👈 calculate remaining upload slots
+
+    return render(request, 'products/edit_product.html', {
+        'form': form,
+        'product': product,
+        'images': images,
+        'remaining_uploads': remaining_uploads  # 👈 pass to template
+    })
+
+
+
+@login_required
+def delete_product_image(request, image_id):
+    image = get_object_or_404(ProductImage, id=image_id, product__artisan=request.user.artisanprofile)
+    product_id = image.product.id
+    image.delete()
+    return redirect('edit_product', pk=product_id)
 
 
 @login_required

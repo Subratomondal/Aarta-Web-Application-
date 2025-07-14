@@ -11,11 +11,15 @@ def register_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_artisan = form.cleaned_data.get('is_artisan')
+
+            # Checkbox handling
+            is_artisan = request.POST.get('is_artisan') == 'on'
+            user.is_artisan = is_artisan
+
             user.save()
+            login(request, user)  # Optional: log them in immediately
+
             return redirect('artisan_dashboard' if user.is_artisan else 'home')
-
-
     else:
         form = RegisterForm()
 
