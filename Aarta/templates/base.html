@@ -74,6 +74,21 @@
                         </span>
                         {% endif %}
                     </a>
+                   <a href="{% url 'view_wishlist' %}" class="relative inline-flex items-center gap-1 text-mahogany hover:text-brown transition">
+                      <!-- Heart Icon -->
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3.172 5.172a4 4 0 015.656 0L12 8.343l3.172-3.171a4 4 0 115.656 5.656L12 21.657 3.172 10.828a4 4 0 010-5.656z"></path>
+                      </svg>
+
+                      <!-- Wishlist Counter -->
+                      {% if wishlist_count > 0 %}
+                        <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full">
+                          {{ wishlist_count }}
+                        </span>
+                      {% endif %}
+                    </a>
+
 
                 {% endif %}
                 <span class="text-dark">Hi, {{ user.username }}!</span>

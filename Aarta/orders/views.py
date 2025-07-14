@@ -3,7 +3,7 @@ from django.db.models import F
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import CartItem, Order, OrderItem
+from .models import CartItem, Order, OrderItem, WishlistItem
 from products.models import Product
 from django.contrib import messages
 
@@ -133,3 +133,27 @@ def delete_order(request, order_id):
         return redirect('my_orders')
 
     return render(request, 'orders/confirm_delete_order.html', {'order': order})
+
+
+@login_required
+def add_to_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    wishlist_item, created = WishlistItem.objects.get_or_create(user=request.user, product=product)
+
+    if not created:
+        messages.info(request, "Already in your wishlist.")
+    else:
+        messages.success(request, "Added to your wishlist.")
+
+    return redirect('product_detail', pk=product_id)
+
+@login_required
+def remove_from_wishlist(request, product_id):
+    WishlistItem.objects.filter(user=request.user, product_id=product_id).delete()
+    messages.success(request, "Removed from wishlist.")
+    return redirect('view_wishlist')
+
+@login_required
+def view_wishlist(request):
+    wishlist_items = WishlistItem.objects.filter(user=request.user)
+    return render(request, 'orders/wishlist.html', {'wishlist_items': wishlist_items})

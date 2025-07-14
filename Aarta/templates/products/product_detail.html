@@ -54,7 +54,7 @@
         </ul>
       </div>
 
-      <!-- Add to Cart -->
+      <!-- Add to Cart & Wishlist -->
       <div class="mt-10">
         {% if product.stock > 0 %}
           {% if user.is_authenticated and not user.is_artisan %}
@@ -71,12 +71,32 @@
                 Add to Cart
               </button>
             </form>
+
+            <!-- Wishlist Button -->
+            {% if is_wishlisted %}
+              <form method="POST" action="{% url 'remove_from_wishlist' product.id %}" class="mt-4 inline-block">
+                {% csrf_token %}
+                <button type="submit"
+                        class="bg-red-100 text-red-600 px-4 py-2 rounded-lg border border-red-300 hover:bg-red-200 transition text-sm font-medium">
+                  ❤️ Remove from Wishlist
+                </button>
+              </form>
+            {% else %}
+              <form method="POST" action="{% url 'add_to_wishlist' product.id %}" class="mt-4 inline-block">
+                {% csrf_token %}
+                <button type="submit"
+                        class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-200 transition text-sm font-medium">
+                  🤍 Add to Wishlist
+                </button>
+              </form>
+            {% endif %}
+
             <p class="text-sm text-gray-500 mt-3 italic">
               Handcrafted with care. Slight variations are a beautiful reminder of its uniqueness.
             </p>
           {% elif not user.is_authenticated %}
             <p class="text-base text-gray-600 mt-4">
-              <a href="{% url 'login' %}" class="text-brown font-semibold hover:underline">Login</a> to add this item to your cart.
+              <a href="{% url 'login' %}" class="text-brown font-semibold hover:underline">Login</a> to add this item to your cart or wishlist.
             </p>
           {% endif %}
         {% else %}

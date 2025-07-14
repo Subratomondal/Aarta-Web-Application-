@@ -6,7 +6,7 @@ from users.models import ArtisanProfile, User
 # Create your models here.
 class Category(models.Model):
     name = models.CharField(max_length=100)
-
+    is_featured = models.BooleanField(default=False)  # 👈 Admin-controlled
     def __str__(self):
         return self.name
 

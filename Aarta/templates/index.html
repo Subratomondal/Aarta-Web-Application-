@@ -102,21 +102,23 @@
 <!-- Categories Section -->
 <section class="mb-16">
     <h2 class="text-3xl font-display text-brown font-semibold mb-6 text-center">Explore Categories</h2>
+
+    {% if categories %}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div class="bg-peach border border-sand rounded-xl p-6 text-center shadow hover:shadow-md transition">
-            <span class="text-lg font-medium text-dark">Home Decor</span>
-        </div>
-        <div class="bg-peach border border-sand rounded-xl p-6 text-center shadow hover:shadow-md transition">
-            <span class="text-lg font-medium text-dark">Jewelry</span>
-        </div>
-        <div class="bg-peach border border-sand rounded-xl p-6 text-center shadow hover:shadow-md transition">
-            <span class="text-lg font-medium text-dark">Pottery</span>
-        </div>
-        <div class="bg-peach border border-sand rounded-xl p-6 text-center shadow hover:shadow-md transition">
-            <span class="text-lg font-medium text-dark">Handwoven</span>
-        </div>
+        {% for category in categories %}
+        <a href="{% url 'product_gallery' %}?category={{ category.id }}"
+           class="bg-peach border border-sand rounded-xl p-6 text-center shadow hover:shadow-md transition hover:bg-peach/80">
+            <span class="text-lg font-medium text-dark">{{ category.name }}</span>
+        </a>
+        {% endfor %}
     </div>
+    {% else %}
+    <div class="text-center text-gray-500 text-base mt-6">
+        No featured categories available at the moment.
+    </div>
+    {% endif %}
 </section>
+
 
 <!-- Featured Products Section -->
 <section id="gallery" class="py-20 bg-[#AB531F0D]">

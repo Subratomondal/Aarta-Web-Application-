@@ -2,27 +2,65 @@
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from orders.models import OrderItem
+from orders.models import OrderItem, WishlistItem
 from .forms import ProductForm
-from .models import Product, ProductImage
+from .models import Product, ProductImage, Category
 from users.models import ArtisanProfile
+
 
 
 def home(request):
     featured_products = Product.objects.filter(is_featured=True, is_approved=True)[:6]
-    return render(request, 'index.html', {'featured_products': featured_products})
+    featured_categories = Category.objects.filter(is_featured=True)[:4]  # admin controls which are shown
+    return render(request, 'index.html', {
+        'featured_products': featured_products,
+        'categories': featured_categories
+    })
+
 
 
 def product_gallery(request):
-    products = Product.objects.filter(is_approved=True).order_by('-created_at')
-    return render(request, 'products/product_gallery.html', {'products': products})
+    products = Product.objects.filter(is_approved=True)
+    categories = Category.objects.all()
+
+    # Category Filter
+    category_id = request.GET.get('category')
+    if category_id:
+        products = products.filter(category_id=category_id)
+
+    # Sorting
+    sort_option = request.GET.get('sort')
+    if sort_option == 'price_asc':
+        products = products.order_by('price')
+    elif sort_option == 'price_desc':
+        products = products.order_by('-price')
+    elif sort_option == 'newest':
+        products = products.order_by('-created_at')
+
+    context = {
+        'products': products,
+        'categories': categories,
+        'selected_category': category_id,
+        'sort_option': sort_option,
+    }
+
+    return render(request, 'products/product_gallery.html', context)
 
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
+
     if not product.is_approved and not request.user.is_staff:
         return redirect('product_gallery')
-    return render(request, 'products/product_detail.html', {'product': product})
+
+    is_wishlisted = False
+    if request.user.is_authenticated:
+        is_wishlisted = WishlistItem.objects.filter(user=request.user, product=product).exists()
+
+    return render(request, 'products/product_detail.html', {
+        'product': product,
+        'is_wishlisted': is_wishlisted  # ✅ Pass to template
+    })
 
 
 @login_required

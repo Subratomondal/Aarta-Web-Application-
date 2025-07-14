@@ -3,9 +3,9 @@ from .models import Product, Category, ProductImage
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'artisan', 'price', 'stock', 'is_approved','is_featured')
-    list_filter = ('is_approved','is_featured', 'category')
-    actions = ['approve_selected','mark_as_featured', 'remove_from_featured']
+    list_display = ('name', 'artisan', 'price', 'stock', 'is_approved', 'is_featured')
+    list_filter = ('is_approved', 'is_featured', 'category')
+    actions = ['approve_selected', 'mark_as_featured', 'remove_from_featured']
 
     @admin.action(description='Approve selected products')
     def approve_selected(self, request, queryset):
@@ -19,5 +19,11 @@ class ProductAdmin(admin.ModelAdmin):
     def remove_from_featured(self, request, queryset):
         queryset.update(is_featured=False)
 
-admin.site.register(Category)
+# ✅ Register Category with featured control
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_featured')
+    list_editable = ('is_featured',)
+    list_filter = ('is_featured',)
+
 admin.site.register(ProductImage)

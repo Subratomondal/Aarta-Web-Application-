@@ -7,10 +7,42 @@
         Explore <span class="text-[#AB531F]">Handmade</span> Creations
     </h2>
 
+    <!-- Filter and Sort Form -->
+    <form method="get" class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+        <!-- Category Filter -->
+        <div class="flex items-center gap-2">
+            <label for="category" class="text-sm text-gray-700 font-medium">Category:</label>
+            <select name="category" id="category" class="border px-3 py-2 rounded-md">
+                <option value="">All</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id|stringformat:"s" == selected_category %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Sort Options -->
+        <div class="flex items-center gap-2">
+            <label for="sort" class="text-sm text-gray-700 font-medium">Sort By:</label>
+            <select name="sort" id="sort" class="border px-3 py-2 rounded-md">
+                <option value="">Default</option>
+                <option value="price_asc" {% if sort_option == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_desc" {% if sort_option == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                <option value="newest" {% if sort_option == 'newest' %}selected{% endif %}>Newest</option>
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="bg-brown text-white px-4 py-2 rounded hover:bg-mahogany transition">Apply</button>
+    </form>
+
+    <!-- Product Grid -->
     {% if products %}
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {% for product in products %}
-                <a href="{% url 'product_detail' product.pk %}" class="group block bg-white rounded-xl overflow-hidden border border-sand shadow-sm hover:shadow-md transition duration-300">
+                <a href="{% url 'product_detail' product.pk %}"
+                   class="group block bg-white rounded-xl overflow-hidden border border-sand shadow-sm hover:shadow-md transition duration-300">
 
                     <!-- Product Image -->
                     {% if product.images.first %}
@@ -41,4 +73,3 @@
     {% endif %}
 </div>
 {% endblock %}
-
