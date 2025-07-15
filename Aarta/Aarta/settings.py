@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'products',
     'orders',
     'users.apps.UsersConfig',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

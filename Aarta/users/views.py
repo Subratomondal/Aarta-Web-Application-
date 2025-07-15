@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from products.models import Product
-from users.forms import RegisterForm
+from users.forms import RegisterForm, ArtisanProfileForm
+from users.models import ArtisanProfile
 
 
 def register_view(request):
@@ -65,3 +66,20 @@ from django.shortcuts import render, redirect
 def buyer_dashboard(request):
     return render(request, 'users/buyer_dashboard.html')
 
+@login_required
+def edit_artisan_profile(request):
+    if not request.user.is_artisan:
+        return redirect('home')
+
+    profile, created = ArtisanProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = ArtisanProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('artisan_dashboard')
+    else:
+        form = ArtisanProfileForm(instance=profile)
+
+    return render(request, 'users/edit_artisan_profile.html', {'form': form})
