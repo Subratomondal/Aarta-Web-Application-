@@ -14,8 +14,21 @@
     <!-- Heading -->
     <h2 class="text-3xl font-bold text-green-600 mb-3">Thank you for your order!</h2>
 
-    <!-- Details -->
-    <p class="text-gray-700 text-base">Your order <span class="font-semibold text-charcoal">#{{ order.id }}</span> has been placed successfully.</p>
+    <!-- Order ID -->
+    <p class="text-gray-700 text-base mb-4">Your order <span class="font-semibold text-charcoal">#{{ order.id }}</span> has been placed successfully.</p>
+
+    <!-- Shipping Information -->
+    <div class="text-left bg-gray-50 p-5 rounded-lg border border-gray-200 mt-6">
+        <h3 class="text-lg font-semibold text-brown mb-3">Shipping Information</h3>
+        <ul class="text-sm text-gray-800 space-y-1">
+            <li><strong>Full Name:</strong> {{ order.full_name }}</li>
+            <li><strong>Phone Number:</strong> {{ order.phone_number }}</li>
+            <li><strong>Address:</strong> {{ order.address }}</li>
+            <li><strong>City:</strong> {{ order.city }}</li>
+            <li><strong>State:</strong> {{ order.state }}</li>
+            <li><strong>Postal Code:</strong> {{ order.postal_code }}</li>
+        </ul>
+    </div>
 
     <!-- Button -->
     <a href="{% url 'product_gallery' %}" class="inline-block mt-8 px-6 py-3 bg-brown text-white rounded-lg hover:bg-mahogany transition">

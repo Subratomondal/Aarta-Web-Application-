@@ -3,7 +3,9 @@ from django.db.models import F
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import CartItem, Order, OrderItem, WishlistItem
+
+from .forms import ShippingForm, ShippingAddressForm
+from .models import CartItem, Order, OrderItem, WishlistItem, ShippingAddress
 from products.models import Product
 from django.contrib import messages
 
@@ -67,46 +69,108 @@ def remove_from_cart(request, item_id):
 
 
 @login_required
-@transaction.atomic
-def place_order(request):
-    cart_items = CartItem.objects.select_related('product').filter(user=request.user).select_for_update()
-
+def checkout(request):
+    cart_items = CartItem.objects.filter(user=request.user)
     if not cart_items:
         messages.error(request, "Your cart is empty.")
         return redirect('view_cart')
 
-    # Validate stock availability
-    for item in cart_items:
-        if item.quantity > item.product.stock:
-            messages.error(request, f"Only {item.product.stock} unit(s) left for '{item.product.name}'. Please update your cart.")
-            return redirect('view_cart')
-
-    # Create Order
     total = sum(item.get_total_price() for item in cart_items)
-    order = Order.objects.create(buyer=request.user, total_amount=total)
 
-    # Deduct stock and create OrderItems
-    for item in cart_items:
-        product = item.product
-        product.stock = F('stock') - item.quantity
-        product.save()
+    saved_addresses = ShippingAddress.objects.filter(user=request.user)
+    shipping_form = ShippingForm()
+    address_form = ShippingAddressForm()
 
-        OrderItem.objects.create(
-            order=order,
-            product=product,
-            quantity=item.quantity,
-            price=product.price
-        )
+    return render(request, 'orders/checkout.html', {
+        'cart_items': cart_items,
+        'total': total,
+        'shipping_form': shipping_form,
+        'address_form': address_form,
+        'saved_addresses': saved_addresses
+    })
 
-    cart_items.delete()
-    messages.success(request, "Order placed successfully!")
+@login_required
+@transaction.atomic
+def place_order(request):
+    cart_items = CartItem.objects.select_related('product').filter(user=request.user).select_for_update()
+    if not cart_items:
+        messages.error(request, "Your cart is empty.")
+        return redirect('view_cart')
 
-    return redirect('order_success', order_id=order.id)
+    total = sum(item.get_total_price() for item in cart_items)
+
+    if request.method == "POST":
+        use_saved = request.POST.get('use_saved')
+        shipping_form = ShippingForm(request.POST)
+        address_form = ShippingAddressForm(request.POST)
+
+        if use_saved:
+            try:
+                address = ShippingAddress.objects.get(id=use_saved, user=request.user)
+                order = Order.objects.create(
+                    buyer=request.user,
+                    total_amount=total,
+                    full_name=address.full_name,
+                    phone_number=address.phone_number,
+                    address=address.address,
+                    city=address.city,
+                    state=address.state,
+                    postal_code=address.postal_code
+                )
+            except ShippingAddress.DoesNotExist:
+                messages.error(request, "Invalid saved address selected.")
+                return redirect('checkout')
+        elif shipping_form.is_valid():
+            order = shipping_form.save(commit=False)
+            order.buyer = request.user
+            order.total_amount = total
+            order.save()
+
+            # Optionally save this address for future use
+            if request.POST.get("save_address"):
+                ShippingAddress.objects.create(
+                    user=request.user,
+                    full_name=order.full_name,
+                    phone_number=order.phone_number,
+                    address=order.address,
+                    city=order.city,
+                    state=order.state,
+                    postal_code=order.postal_code
+                )
+        else:
+            messages.error(request, "Please fill out a valid shipping address.")
+            return redirect('checkout')
+
+        for item in cart_items:
+            if item.quantity > item.product.stock:
+                messages.error(request, f"Not enough stock for {item.product.name}")
+                return redirect('view_cart')
+
+            item.product.stock = F('stock') - item.quantity
+            item.product.save()
+
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+
+        cart_items.delete()
+        messages.success(request, "Order placed successfully!")
+        return redirect('order_success', order_id=order.id)
+
+    return redirect('checkout')
 
 @login_required
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, buyer=request.user)
     return render(request, 'orders/order_success.html', {'order': order})
+
+@login_required
+def saved_addresses(request):
+    addresses = ShippingAddress.objects.filter(user=request.user)
+    return render(request, 'orders/saved_addresses.html', {'addresses': addresses})
 
 @login_required
 def my_orders(request):

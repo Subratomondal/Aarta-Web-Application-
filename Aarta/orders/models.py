@@ -16,6 +16,14 @@ class Order(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
+    # ✅ Shipping Info
+    full_name = models.CharField(max_length=100, default="Unnamed")
+    phone_number = models.CharField(max_length=15, default="0000000000")
+    address = models.TextField(default="Default Address")
+    city = models.CharField(max_length=50, default="City")
+    state = models.CharField(max_length=50, default="State")
+    postal_code = models.CharField(max_length=10, default="000000")
+
     def __str__(self):
         return f"Order #{self.id} by {self.buyer.username if self.buyer else 'Guest'}"
 
@@ -53,3 +61,16 @@ class WishlistItem(models.Model):
 
     def __str__(self):
         return f"{self.user.username} → {self.product.name}"
+
+class ShippingAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shipping_addresses')
+    full_name = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=15)
+    address = models.TextField()
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    postal_code = models.CharField(max_length=10)
+    is_default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.full_name}, {self.city}, {self.state}"
