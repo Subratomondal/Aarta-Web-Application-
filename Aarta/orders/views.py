@@ -8,7 +8,7 @@ from .forms import ShippingForm, ShippingAddressForm
 from .models import CartItem, Order, OrderItem, WishlistItem, ShippingAddress
 from products.models import Product
 from django.contrib import messages
-
+from django.http import JsonResponse
 
 @login_required
 def add_to_cart(request, product_id):
@@ -54,10 +54,14 @@ def view_cart(request):
     # Check if any cart item exceeds available stock
     insufficient_stock = any(item.quantity > item.product.stock for item in cart_items)
 
+    # ✅ Add total_quantity here
+    total_quantity = sum(item.quantity for item in cart_items)
+
     return render(request, 'orders/cart.html', {
         'cart_items': cart_items,
         'total': total,
-        'insufficient_stock': insufficient_stock
+        'insufficient_stock': insufficient_stock,
+        'total_quantity': total_quantity,  # ✅ Add this
     })
 
 @login_required
@@ -258,3 +262,36 @@ def move_to_cart(request, product_id):
 
     messages.success(request, f"{product.name} moved to your cart.")
     return redirect('view_wishlist')
+
+@login_required
+def update_cart_quantity(request, item_id):
+    item = get_object_or_404(CartItem, id=item_id, user=request.user)
+
+    if request.method == "POST":
+        try:
+            new_quantity = int(request.POST.get('quantity'))
+        except (ValueError, TypeError):
+            return JsonResponse({'error': "Invalid quantity."}, status=400)
+
+        if new_quantity < 1:
+            item.delete()
+            return JsonResponse({'removed': True})
+        elif new_quantity > item.product.stock:
+            return JsonResponse({'error': f"Only {item.product.stock} in stock."}, status=400)
+        else:
+            item.quantity = new_quantity
+            item.save()
+
+            cart_items = CartItem.objects.filter(user=request.user)
+            cart_total = sum(i.get_total_price() for i in cart_items)
+            total_quantity = sum(i.quantity for i in cart_items)
+
+            return JsonResponse({
+                'success': True,
+                'quantity': item.quantity,
+                'item_total': float(item.get_total_price()),
+                'cart_total': float(cart_total),
+                'total_quantity': total_quantity
+            })
+
+    return JsonResponse({'error': "Invalid request method."}, status=405)
