@@ -71,12 +71,10 @@ def add_product(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES, request=request)
         images = request.FILES.getlist('images')
 
-        if len(images) > 4:
-            form.add_error(None, "You can upload a maximum of 4 images.")
-        elif form.is_valid():
+        if form.is_valid():
             product = form.save(commit=False)
             product.artisan = artisan_profile
             product.save()
@@ -86,7 +84,7 @@ def add_product(request):
 
             return redirect('my_products')
     else:
-        form = ProductForm()
+        form = ProductForm(request=request)
 
     return render(request, 'products/add_product.html', {'form': form})
 
@@ -106,28 +104,25 @@ def edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk, artisan=request.user.artisanprofile)
 
     if request.method == 'POST':
-        form = ProductForm(request.POST, instance=product)
+        form = ProductForm(request.POST, request.FILES, instance=product, request=request)
         images = request.FILES.getlist('images')
-        existing_images_count = product.images.count()
 
-        if existing_images_count + len(images) > 4:
-            form.add_error(None, f"You can only have up to 4 images in total. You already have {existing_images_count}.")
-        elif form.is_valid():
+        if form.is_valid():
             form.save()
             for image in images:
                 ProductImage.objects.create(product=product, image_path=image)
             return redirect('my_products')
     else:
-        form = ProductForm(instance=product)
+        form = ProductForm(instance=product, request=request)
 
     images = product.images.all()
-    remaining_uploads = 4 - images.count()  # 👈 calculate remaining upload slots
+    remaining_uploads = 4 - images.count()
 
     return render(request, 'products/edit_product.html', {
         'form': form,
         'product': product,
         'images': images,
-        'remaining_uploads': remaining_uploads  # 👈 pass to template
+        'remaining_uploads': remaining_uploads
     })
 
 
