@@ -28,7 +28,7 @@
           <div>
             <h3 class="text-xl font-bold text-charcoal mb-1">{{ item.product.name }}</h3>
             <p class="text-sm text-gray-600 mb-2">From: {{ item.product.location }}</p>
-            <p class="text-sm text-gray-600 {% if item.quantity > item.product.stock %}text-red-600{% endif %}">
+            <p class="text-sm {% if item.quantity > item.product.stock %}text-red-600{% else %}text-gray-600{% endif %}">
               Stock Available: {{ item.product.stock }}
             </p>
           </div>
@@ -43,9 +43,15 @@
             <div class="text-sm text-gray-700">
               <span class="font-semibold text-brown">Total:</span> ₹{{ item.get_total_price }}
             </div>
-            <div>
-              <a href="{% url 'remove_from_cart' item.id %}"
-                 class="text-red-600 text-sm font-medium hover:underline">Remove</a>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2 mt-2">
+              <a href="{% url 'remove_from_cart' item.id %}" class="px-4 py-2 bg-red-100 text-red-700 rounded-md text-sm hover:bg-red-200 transition">
+                Remove
+              </a>
+              <a href="{% url 'move_to_wishlist' item.product.id %}" class="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-md text-sm hover:bg-yellow-200 transition">
+                Move to Wishlist
+              </a>
             </div>
           </div>
         </div>

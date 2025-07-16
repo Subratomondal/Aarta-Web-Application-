@@ -221,3 +221,40 @@ def remove_from_wishlist(request, product_id):
 def view_wishlist(request):
     wishlist_items = WishlistItem.objects.filter(user=request.user)
     return render(request, 'orders/wishlist.html', {'wishlist_items': wishlist_items})
+
+@login_required
+def move_to_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    # Delete the product from cart if it exists
+    CartItem.objects.filter(user=request.user, product=product).delete()
+
+    # Add to wishlist (if not already present)
+    wishlist_item, created = WishlistItem.objects.get_or_create(user=request.user, product=product)
+
+    if created:
+        messages.success(request, f"{product.name} moved to your wishlist.")
+    else:
+        messages.info(request, f"{product.name} is already in your wishlist.")
+
+    return redirect('view_cart')
+
+
+@login_required
+def move_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    # Remove from wishlist if it exists
+    WishlistItem.objects.filter(user=request.user, product=product).delete()
+
+    # Add to cart if not already there
+    cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+    else:
+        cart_item.quantity = 1
+        cart_item.save()
+
+    messages.success(request, f"{product.name} moved to your cart.")
+    return redirect('view_wishlist')
