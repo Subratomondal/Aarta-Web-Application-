@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Cancel Order{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto py-10 px-4">
+    <h2 class="text-2xl font-bold mb-4 text-brown">Confirm Cancellation</h2>
+    <p>Are you sure you want to <strong>cancel</strong> <strong>Order #{{ order.id }}</strong> placed on {{ order.created_at|date:"F j, Y" }}?</p>
+    <p class="text-sm text-gray-600 mt-2">Note: This action cannot be undone. The order will be marked as <strong>cancelled</strong> and stock will be restored.</p>
+
+    <form method="POST" class="mt-6">
+        {% csrf_token %}
+        <button type="submit" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">Yes, Cancel Order</button>
+        <a href="{% url 'my_orders' %}" class="ml-4 text-gray-600 hover:underline">Go Back</a>
+    </form>
+</div>
+{% endblock %}
+

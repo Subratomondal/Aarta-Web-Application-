@@ -182,25 +182,29 @@ def my_orders(request):
     return render(request, 'orders/my_orders.html', {'orders': orders})
 
 @login_required
-def delete_order(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, buyer=request.user)
 
-    # Only the user who placed the order can delete it
-    if order.buyer != request.user:
-        return HttpResponseForbidden("You are not allowed to delete this order.")
+    if order.status != 'pending':
+        messages.error(request, "Only pending orders can be canceled.")
+        return redirect('my_orders')
 
     if request.method == "POST":
-        # Restore stock before deleting the order
+        # Mark order as canceled
+        order.status = 'canceled'
+        order.save()
+
+        # Restore product stock
         for item in order.items.all():
             product = item.product
             product.stock += item.quantity
             product.save()
 
-        order.delete()
-        messages.success(request, "Order deleted successfully.")
+        messages.success(request, "Order canceled successfully.")
         return redirect('my_orders')
 
-    return render(request, 'orders/confirm_delete_order.html', {'order': order})
+    return render(request, 'orders/confirm_cancel_order.html', {'order': order})
+
 
 
 @login_required
