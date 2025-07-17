@@ -1,8 +1,10 @@
-
+from django.contrib import messages
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from orders.models import OrderItem, WishlistItem
+
+
+from orders.models import OrderItem, WishlistItem, Order
 from .forms import ProductForm
 from .models import Product, ProductImage, Category
 from users.models import ArtisanProfile
@@ -186,3 +188,25 @@ def artisan_dashboard(request):
 
     except ArtisanProfile.DoesNotExist:
         return redirect('home')
+
+@login_required
+def update_order_status(request, order_id):
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+
+        # Get the order only if it contains items by this artisan
+        order = get_object_or_404(Order, id=order_id, items__product__artisan=request.user.artisanprofile)
+
+        valid_transitions = {
+            'pending': 'confirmed',
+            'confirmed': 'shipped',
+        }
+
+        if valid_transitions.get(order.status) == new_status:
+            order.status = new_status
+            order.save()
+            messages.success(request, f"Order marked as {new_status.capitalize()}.")
+        else:
+            messages.warning(request, "Invalid status transition.")
+
+    return redirect('artisan_dashboard')

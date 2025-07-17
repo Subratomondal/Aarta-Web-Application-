@@ -4,6 +4,8 @@ from products import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+from products.views import update_order_status
+
 urlpatterns =[
     path('', views.home, name='home'),
     path('gallery/', views.product_gallery, name='product_gallery'),
@@ -14,6 +16,7 @@ urlpatterns =[
     path('dashboard/',views.artisan_dashboard,name='artisan_dashboard'),
     path('<int:pk>/', views.product_detail, name='product_detail'),
     path('<int:image_id>/delete-image/', views.delete_product_image, name='delete_product_image'),
+    path('artisan/orders/<int:order_id>/update/', update_order_status, name='update_order_status'),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
