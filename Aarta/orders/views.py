@@ -252,20 +252,28 @@ def move_to_wishlist(request, product_id):
 def move_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
-    # Remove from wishlist if it exists
+    # Check stock before moving
+    if product.stock <= 0:
+        messages.error(request, f"{product.name} is out of stock and cannot be moved to cart.")
+        return redirect('view_wishlist')
+
+    # Remove from wishlist
     WishlistItem.objects.filter(user=request.user, product=product).delete()
 
-    # Add to cart if not already there
+    # Add to cart or increase quantity
     cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
     if not created:
+        if cart_item.quantity + 1 > product.stock:
+            messages.error(request, f"Only {product.stock} in stock.")
+            return redirect('view_wishlist')
         cart_item.quantity += 1
-        cart_item.save()
     else:
         cart_item.quantity = 1
-        cart_item.save()
+    cart_item.save()
 
     messages.success(request, f"{product.name} moved to your cart.")
     return redirect('view_wishlist')
+
 
 @login_required
 def update_cart_quantity(request, item_id):

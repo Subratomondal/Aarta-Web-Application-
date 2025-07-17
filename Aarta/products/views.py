@@ -164,7 +164,10 @@ def artisan_dashboard(request):
 
         recent_orders = (
             OrderItem.objects
-            .filter(product__artisan=artisan)
+            .filter(
+                product__artisan=artisan,
+                order__status__in=['pending', 'processing', 'confirmed', 'shipped']  # only active statuses
+            )
             .select_related('order', 'product')
             .order_by('-order__created_at')[:5]
         )
