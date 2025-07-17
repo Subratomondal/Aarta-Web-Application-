@@ -11,21 +11,32 @@
     <div class="space-y-10">
       {% for order in orders %}
       <div class="rounded-2xl overflow-hidden shadow-lg border border-sand bg-[#F9F5F0] hover:shadow-xl transition">
+
         <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-center bg-[#AB531F0D] p-6 border-b border-sand">
           <div>
             <h3 class="text-lg font-semibold text-charcoal">Order ID: #{{ order.id }}</h3>
-            <p class="text-sm text-gray-500">Placed on: {{ order.created_at|date:"M d, Y" }}</p>
+            <p class="text-sm text-gray-500">Placed on: <span class="font-medium">{{ order.created_at|date:"F d, Y – h:i A" }}</span></p>
           </div>
-          <div class="flex items-center gap-4 mt-4 md:mt-0">
-            <span class="px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase
-              {% if order.status == 'delivered' %} bg-green-100 text-green-700
-              {% elif order.status == 'shipped' %} bg-blue-100 text-blue-700
-              {% elif order.status == 'confirmed' %} bg-yellow-100 text-yellow-700
-              {% elif order.status == 'canceled' %} bg-red-100 text-red-700
-              {% else %} bg-gray-100 text-gray-700 {% endif %}">
-              {{ order.get_status_display }}
+          <div class="flex items-center gap-4 mt-4 md:mt-0 flex-wrap justify-center">
+
+            <!-- Status Badge using filter -->
+            <span class="px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase {{ order.status|order_badge_class }}">
+              {% if order.status == 'delivered' %} ✅ Delivered
+              {% elif order.status == 'shipped' %} 📦 Shipped
+              {% elif order.status == 'confirmed' %} 🔄 Confirmed
+              {% elif order.status == 'processing' %} 🔄 Processing
+              {% elif order.status == 'canceled' %} ❌ Canceled
+              {% else %} ⏳ Pending
+              {% endif %}
             </span>
+
+            {% if order.status != 'canceled' %}
+            <a href="{% url 'track_order' order.id %}"
+               class="inline-block bg-indigo-600 text-white text-xs font-semibold px-4 py-2 rounded-md hover:bg-indigo-700 transition shadow">
+              🚚 Track Order
+            </a>
+            {% endif %}
 
             <form action="{% url 'delete_order' order.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?');">
               {% csrf_token %}
@@ -34,22 +45,35 @@
           </div>
         </div>
 
-        <!-- Items -->
+        <!-- Tracking Timeline -->
+        {% if order.status != 'canceled' %}
+        <div class="px-6 pt-4 pb-2">
+          <div class="flex justify-between text-xs font-semibold text-gray-500 mb-2">
+            <span class="{% if order.status|step_reached:'processing' %}text-green-700{% endif %}">Processing</span>
+            <span class="{% if order.status|step_reached:'shipped' %}text-blue-700{% endif %}">Shipped</span>
+            <span class="{% if order.status|step_reached:'delivered' %}text-green-700{% endif %}">Delivered</span>
+          </div>
+          <div class="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div class="absolute h-full bg-green-500 transition-all duration-500 rounded-full"
+                 style="width: {{ order.status|progress_width }};">
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Order Items -->
         <div class="grid md:grid-cols-2 gap-6 p-6">
           {% for item in order.items.all %}
           <div class="flex gap-4 bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition">
-            <!-- Image -->
             {% if item.product.images.first %}
-            <img src="{{ item.product.images.first.image_path.url }}"
-                 alt="{{ item.product.name }}"
-                 class="w-20 h-20 object-cover rounded-lg border">
+            <img src="{{ item.product.images.first.image_path.url }}" alt="{{ item.product.name }}"
+              class="w-20 h-20 object-cover rounded-lg border">
             {% else %}
             <div class="w-20 h-20 bg-gray-100 flex items-center justify-center text-gray-400 text-sm rounded-lg">
               No Image
             </div>
             {% endif %}
 
-            <!-- Info -->
             <div class="flex flex-col justify-between">
               <div>
                 <p class="text-sm font-semibold text-charcoal">{{ item.product.name }}</p>
@@ -61,8 +85,9 @@
           {% endfor %}
         </div>
 
-        <!-- Footer -->
-        <div class="px-6 py-4 border-t border-sand bg-[#FFFDF9] flex justify-end items-center">
+        <!-- Footer with Totals -->
+        <div class="px-6 py-4 border-t border-sand bg-[#FFFDF9] flex flex-col md:flex-row justify-between items-center">
+          <span class="text-sm text-gray-600">Items: <span class="font-semibold">{{ order.items.count }}</span></span>
           <span class="text-lg font-bold text-brown">Total: ₹{{ order.total_amount }}</span>
         </div>
       </div>
@@ -80,4 +105,3 @@
   {% endif %}
 </div>
 {% endblock %}
-

@@ -295,3 +295,13 @@ def update_cart_quantity(request, item_id):
             })
 
     return JsonResponse({'error': "Invalid request method."}, status=405)
+
+
+@login_required
+def track_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, buyer=request.user)
+    steps = ['processing', 'shipped', 'delivered']
+    return render(request, 'orders/track_order.html', {
+        'order': order,
+        'steps': steps  # ✅ pass this to the template
+    })

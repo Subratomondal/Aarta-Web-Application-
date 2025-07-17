@@ -15,7 +15,37 @@
     <h2 class="text-3xl font-bold text-green-600 mb-3">Thank you for your order!</h2>
 
     <!-- Order ID -->
-    <p class="text-gray-700 text-base mb-4">Your order <span class="font-semibold text-charcoal">#{{ order.id }}</span> has been placed successfully.</p>
+    <p class="text-gray-700 text-base mb-4">
+        Your order <span class="font-semibold text-charcoal">#{{ order.id }}</span> has been placed successfully.
+    </p>
+
+    <!-- Order Tracking -->
+    <div class="mt-6 text-left bg-gray-50 p-5 rounded-lg border border-gray-200">
+        <h3 class="text-lg font-semibold text-brown mb-3">Order Status</h3>
+
+        <div class="flex items-center justify-between space-x-2 text-sm font-medium text-gray-700">
+            <div class="flex-1 text-center {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}text-green-600{% endif %}">
+                <div class="mb-1">Processing</div>
+                <div class="h-2 w-full bg-gray-200 rounded">
+                    <div class="{% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}bg-green-500{% else %}bg-gray-300{% endif %} h-2 rounded"></div>
+                </div>
+            </div>
+
+            <div class="flex-1 text-center {% if order.status == 'shipped' or order.status == 'delivered' %}text-green-600{% endif %}">
+                <div class="mb-1">Shipped</div>
+                <div class="h-2 w-full bg-gray-200 rounded">
+                    <div class="{% if order.status == 'shipped' or order.status == 'delivered' %}bg-green-500{% else %}bg-gray-300{% endif %} h-2 rounded"></div>
+                </div>
+            </div>
+
+            <div class="flex-1 text-center {% if order.status == 'delivered' %}text-green-600{% endif %}">
+                <div class="mb-1">Delivered</div>
+                <div class="h-2 w-full bg-gray-200 rounded">
+                    <div class="{% if order.status == 'delivered' %}bg-green-500{% else %}bg-gray-300{% endif %} h-2 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Shipping Information -->
     <div class="text-left bg-gray-50 p-5 rounded-lg border border-gray-200 mt-6">

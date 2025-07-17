@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load order_filters %}
+
+{% block title %}Track Order – Aarta{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-10">
+    <h2 class="text-2xl font-semibold mb-6">Track Your Order</h2>
+
+    <div class="bg-white p-6 rounded shadow">
+        <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <p><strong>Placed on:</strong> {{ order.created_at|date:"F d, Y" }}</p>
+        <p><strong>Current Status:</strong> {{ order.status|title }}</p>
+
+        <div class="mt-8">
+            <h3 class="text-lg font-semibold mb-4">Order Progress</h3>
+            <div class="flex items-center justify-between space-x-2">
+                {% order_steps as steps %}
+                {% for step in steps %}
+                    <div class="flex items-center space-x-2 flex-1">
+                        <!-- Step Circle -->
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold
+                            {% if order.status|step_reached:step %}
+                                bg-green-500 text-white
+                            {% else %}
+                                bg-gray-300 text-gray-600
+                            {% endif %}">
+                            {{ forloop.counter }}
+                        </div>
+                        <!-- Line to next step -->
+                        {% if not forloop.last %}
+                            <div class="h-1 flex-1
+                                {% if order.status|step_reached:step %}
+
+                                    bg-green-500
+                                {% else %}
+                                    bg-gray-300
+                                {% endif %}">
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Step Labels -->
+            <div class="flex justify-between mt-2 text-sm text-center">
+                {% for step in steps %}
+                    <div class="flex-1 text-center">{{ step|title }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
