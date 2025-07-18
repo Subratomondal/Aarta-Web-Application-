@@ -62,10 +62,10 @@
   {% if products %}
   <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
     {% for product in products %}
-    <div class="bg-white rounded-lg shadow-sm border border-sand hover:shadow-md transition overflow-hidden flex flex-col text-sm cursor-pointer"
-         onclick="openGalleryModal({{ product.id }})">
+    <div class="bg-white rounded-lg shadow-sm border border-sand hover:shadow-md transition overflow-hidden flex flex-col text-sm">
+
       {% if product.images.first %}
-      <div class="w-full aspect-[4/3] overflow-hidden">
+      <div class="w-full aspect-[4/3] overflow-hidden cursor-pointer" onclick="openGalleryModal({{ product.id }})">
         <img src="{{ product.images.first.image_path.url }}" alt="{{ product.name }}"
           class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 rounded-t-lg">
       </div>
@@ -93,28 +93,31 @@
     </div>
 
     <!-- Product Image Carousel Modal -->
-<div id="galleryModal-{{ product.id }}" class="fixed inset-0 bg-black bg-opacity-80 z-50 hidden items-center justify-center px-4">
-  <div class="bg-white rounded-lg max-w-2xl w-full relative p-6 shadow-xl text-center">
-    <span class="absolute top-3 right-4 text-gray-800 text-2xl cursor-pointer hover:text-red-600" onclick="closeGalleryModal({{ product.id }})">&times;</span>
-    <h2 class="text-xl font-semibold mb-4 text-brown">{{ product.name }} – Image Gallery</h2>
+    <div id="galleryModal-{{ product.id }}" class="fixed inset-0 bg-black bg-opacity-80 z-50 hidden items-center justify-center px-4">
+      <div class="bg-white rounded-lg max-w-2xl w-full relative p-6 shadow-xl text-center">
+        <span class="absolute top-3 right-4 text-gray-800 text-2xl cursor-pointer hover:text-red-600"
+              onclick="closeGalleryModal({{ product.id }})">&times;</span>
+        <h2 class="text-xl font-semibold mb-4 text-brown">{{ product.name }} – Image Gallery</h2>
 
-    <div class="relative">
-      <img id="carouselImage-{{ product.id }}" class="w-full max-h-[60vh] object-contain rounded border border-sand mx-auto" alt="Product Image" src="">
+        <div class="relative">
+          <img id="carouselImage-{{ product.id }}" class="w-full max-h-[60vh] object-contain rounded border border-sand mx-auto" alt="Product Image" src="">
 
-      <!-- Prev Button -->
-      <button onclick="prevImage({{ product.id }})" class="absolute left-0 top-1/2 transform -translate-y-1/2 px-3 py-2 bg-white text-gray-700 rounded-full shadow hover:bg-brown hover:text-white">
-        &#10094;
-      </button>
+          <!-- Prev Button -->
+          <button onclick="prevImage({{ product.id }})"
+                  class="absolute left-0 top-1/2 transform -translate-y-1/2 px-3 py-2 bg-white text-gray-700 rounded-full shadow hover:bg-brown hover:text-white">
+            &#10094;
+          </button>
 
-      <!-- Next Button -->
-      <button onclick="nextImage({{ product.id }})" class="absolute right-0 top-1/2 transform -translate-y-1/2 px-3 py-2 bg-white text-gray-700 rounded-full shadow hover:bg-brown hover:text-white">
-        &#10095;
-      </button>
+          <!-- Next Button -->
+          <button onclick="nextImage({{ product.id }})"
+                  class="absolute right-0 top-1/2 transform -translate-y-1/2 px-3 py-2 bg-white text-gray-700 rounded-full shadow hover:bg-brown hover:text-white">
+            &#10095;
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-
     {% endfor %}
+
   </div>
   {% else %}
   <div class="text-center text-gray-500 py-16">

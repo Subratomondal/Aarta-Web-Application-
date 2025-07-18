@@ -10,6 +10,8 @@ from products.models import Product
 from django.contrib import messages
 from django.http import JsonResponse
 
+
+
 @login_required
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -162,6 +164,8 @@ def place_order(request):
 
         cart_items.delete()
         messages.success(request, "Order placed successfully!")
+
+
         return redirect('order_success', order_id=order.id)
 
     return redirect('checkout')
