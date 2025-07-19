@@ -13,7 +13,11 @@ class RegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ["username", "email", "password1", "password2", "is_artisan"]
+        # ✅ Simplified to only include the model fields.
+        # The form automatically handles password fields.
+        fields = ("username", "email")
+
+# ... your ArtisanProfileForm would go here ...
 
 class ArtisanProfileForm(forms.ModelForm):
     class Meta:

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Payment – Aarta{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-12 p-8 bg-peach/60 border border-white/20 shadow-lg rounded-2xl backdrop-blur-md text-center">
+
+  <h2 class="text-3xl font-serif font-bold text-charcoal mb-6">
+    Complete Your <span class="text-[#AB531F]">Payment</span>
+  </h2>
+
+  <p class="text-lg text-dark mb-4">
+    You're paying <span class="font-semibold text-brown">₹{{ total_amount }}</span> for your order.
+  </p>
+
+  <div id="payment-loader" class="text-sm text-gray-600">Opening secure payment gateway...</div>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    // IMPORTANT: Make sure this is your correct Razorpay Test Key
+    const testKey = "rzp_test_5VSvVYEhWFfwdM";
+
+    const options = {
+        key: testKey,
+        amount: "100", // <-- HARDCODED to 1 Rupee (100 paise)
+        currency: "INR",
+        name: "Aarta",
+        description: "Final Test Transaction",
+        order_id: "{{ razorpay_order_id }}", // This MUST come from the backend
+
+        // Simplified handler for testing
+        handler: function (response) {
+            alert("IT WORKED! Payment ID: " + response.razorpay_payment_id);
+        },
+
+        prefill: {
+            name: "Test User",
+            email: "test.user@example.com"
+        },
+
+        theme: {
+            color: "#AB531F"
+        },
+
+        modal: {
+            ondismiss: function () {
+                alert("Payment modal was closed.");
+            }
+        }
+    };
+
+    // Safety check
+    if (options.key && options.key !== "YOUR_TEST_KEY_HERE" && options.order_id) {
+        const rzp = new Razorpay(options);
+        rzp.open();
+    } else {
+        alert("Error: Razorpay Key or Order ID is missing.");
+    }
+</script>
+</div>
+{% endblock %}

@@ -14,9 +14,10 @@ def register_view(request):
         if form.is_valid():
             user = form.save(commit=False)
 
-            is_artisan = request.POST.get('is_artisan') == 'on'
-            user.is_artisan = is_artisan
+            # ✅ Get the value from the form's validated data
+            user.is_artisan = form.cleaned_data.get('is_artisan', False)
             user.save()
+
 
             login(request, user)
 
@@ -34,41 +35,25 @@ def register_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-
-            if user.is_artisan:
-                if not user.is_approved_artisan:
-                    messages.warning(request, "Your artisan profile is pending admin approval.")
-                    return redirect('pending_approval')
-                return redirect('artisan_dashboard')
-            else:
-                return redirect('home')
+            # This is the correct logic: it redirects every user to the single
+            # 'dashboard' dispatch view, which then handles routing them to the
+            # correct page (artisan, buyer, or pending).
+            return redirect('dashboard')
         else:
             messages.error(request, "Invalid username or password.")
 
     return render(request, 'users/login.html')
-
 
 def logout_view(request):
     logout(request)
     return redirect('home')
 
 
-@login_required
-def artisan_dashboard(request):
-    if not request.user.is_artisan or not request.user.is_approved_artisan:
-        messages.error(request, "Access denied. You must be an approved artisan.")
-        return redirect('home')
-
-    products = Product.objects.filter(artisan=request.user.artisanprofile)
-    return render(request, 'users/dashboard.html', {
-        'user': request.user,
-        'products': products
-    })
 
 
 @login_required
@@ -101,3 +86,15 @@ def pending_approval_view(request):
     if not request.user.is_artisan or request.user.is_approved_artisan:
         return redirect('home')
     return render(request, 'users/pending_approval.html')
+
+@login_required
+def dashboard_dispatch_view(request):
+    # ✅ Add the approval check here
+    if request.user.is_artisan and request.user.is_approved_artisan:
+        return redirect('artisan_dashboard')
+    elif request.user.is_artisan:
+        # If they are an artisan but not approved, send them to the pending page
+        return redirect('pending_approval')
+    else:
+        # Otherwise, they are a buyer
+        return redirect('buyer_dashboard')

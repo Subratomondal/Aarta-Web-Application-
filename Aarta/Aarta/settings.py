@@ -167,3 +167,8 @@ LOGGING = {
     },
 }
 
+# settings.py
+RAZORPAY_KEY_ID = 'rzp_test_5VSvVYEhWFfwdM'
+RAZORPAY_KEY_SECRET = 'exUKdrYeJBSS2j5nhxLfiwSo'
+
+

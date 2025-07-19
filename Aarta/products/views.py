@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -77,14 +78,15 @@ def add_product(request):
         images = request.FILES.getlist('images')
 
         if form.is_valid():
-            product = form.save(commit=False)
-            product.artisan = artisan_profile
-            product.save()
+            with transaction.atomic():
+                product = form.save(commit=False)
+                product.artisan = artisan_profile
+                product.save()
 
-            for image in images:
-                ProductImage.objects.create(product=product, image_path=image)
+                for image in images:
+                    ProductImage.objects.create(product=product, image_path=image)
 
-            return redirect('my_products')
+                return redirect('artisan_dashboard')
     else:
         form = ProductForm(request=request)
 
@@ -113,7 +115,7 @@ def edit_product(request, pk):
             form.save()
             for image in images:
                 ProductImage.objects.create(product=product, image_path=image)
-            return redirect('my_products')
+            return redirect('artisan_dashboard')
     else:
         form = ProductForm(instance=product, request=request)
 
@@ -142,12 +144,16 @@ def delete_product(request, pk):
     product = get_object_or_404(Product, pk=pk, artisan=request.user.artisanprofile)
     if request.method == 'POST':
         product.delete()
-        return redirect('my_products')
+        return redirect('artisan_dashboard')
     return render(request, 'products/confirm_delete.html', {'product': product})
 
 
 @login_required
 def artisan_dashboard(request):
+    # ✅ ADD THIS SECURITY BLOCK
+    if not request.user.is_artisan or not request.user.is_approved_artisan:
+        messages.error(request, "Access denied.")
+        return redirect('home')
     try:
         artisan = request.user.artisanprofile
         products = Product.objects.filter(artisan=artisan)

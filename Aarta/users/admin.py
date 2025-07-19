@@ -51,8 +51,9 @@ class ArtisanAdmin(admin.ModelAdmin):
         count = queryset.count()
         for profile in queryset:
             user = profile.user
-            send_rejection_email(user.email, user.username)
-            user.delete()
+            send_rejection_email(user)
+            user.is_active = False
+            user.save()
         self.message_user(request, f"{count} artisan(s) rejected, deleted, and notified.")
     reject_selected_artisans.short_description = "❌ Reject selected artisans"
 
@@ -92,6 +93,7 @@ class ArtisanAdmin(admin.ModelAdmin):
         user = profile.user
         send_rejection_email(profile.user)
         username = user.username
-        user.delete()
+        user.is_active = False
+        user.save()
         self.message_user(request, f"{username} has been rejected, deleted, and notified.")
         return redirect(request.META.get('HTTP_REFERER', '/admin/'))

@@ -52,3 +52,6 @@ def index(sequence, position):
     except IndexError:
         return ''
 
+@register.filter
+def split(value, delimiter=","):
+    return value.split(delimiter)

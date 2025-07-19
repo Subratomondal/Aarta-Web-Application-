@@ -42,25 +42,20 @@
 <!-- Header -->
 <header class="bg-peach shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        <!-- Logo -->
         <div class="flex items-center space-x-3">
             <img src="{% static 'image/logo-removebg-preview.png' %}" alt="Aarta Logo" class="h-10 w-auto">
         </div>
 
-        <!-- Navigation -->
         <nav class="space-x-6 text-sm font-medium hidden md:flex items-center">
             <a href="/" class="text-dark hover:text-brown transition">Home</a>
             <a href="{% url 'product_gallery' %}" class="text-dark hover:text-brown transition">Explore</a>
 
             {% if user.is_authenticated %}
-                {% if user.is_artisan %}
-                    <a href="{% url 'artisan_dashboard' %}" class="text-dark hover:text-brown transition">Dashboard</a>
-                {% else %}
-                    <a href="{% url 'buyer_dashboard' %}" class="text-dark hover:text-brown transition">Dashboard</a>
 
-                    <!-- Cart Icon for Buyer -->
+                <a href="{% url 'dashboard' %}" class="text-dark hover:text-brown transition">Dashboard</a>
+
+                {% if not user.is_artisan %}
                     <a href="{% url 'view_cart' %}" class="relative text-dark hover:text-brown transition inline-flex items-center">
-                        <!-- New Cart Icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M2.25 3h1.664a.75.75 0 01.728.574L5.857 6H20.25a.75.75 0 01.716.976l-2.25 7.5a.75.75 0 01-.716.524H8.292a.75.75 0 01-.728-.574L5.107 7.5H3.25a.75.75 0 010-1.5h1.356L3.572 3.574A.75.75 0 013.25 3H2.25a.75.75 0 010-1.5h1.5a.75.75 0 01.728.574L5.857 6H6a.75.75 0 010 1.5h-.857l2.208 7.5h10.875l2.25-7.5H6.643L5.572 3.574A.75.75 0 015 3H2.25z"></path>
@@ -75,22 +70,19 @@
                         {% endif %}
                     </a>
                    <a href="{% url 'view_wishlist' %}" class="relative inline-flex items-center gap-1 text-mahogany hover:text-brown transition">
-                      <!-- Heart Icon -->
                       <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M3.172 5.172a4 4 0 015.656 0L12 8.343l3.172-3.171a4 4 0 115.656 5.656L12 21.657 3.172 10.828a4 4 0 010-5.656z"></path>
+                              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                       </svg>
 
-                      <!-- Wishlist Counter -->
                       {% if wishlist_count > 0 %}
                         <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full">
                           {{ wishlist_count }}
                         </span>
                       {% endif %}
                     </a>
-
-
                 {% endif %}
+
                 <span class="text-dark">Hi, {{ user.username }}!</span>
                 <a href="{% url 'logout' %}" class="text-dark hover:text-brown transition">Logout</a>
             {% else %}
@@ -101,10 +93,8 @@
                 </a>
             {% endif %}
         </nav>
-
     </div>
 </header>
-
 <!-- Main Content -->
 <main class="max-w-7xl mx-auto py-12 px-4">
     {% block content %}{% endblock %}

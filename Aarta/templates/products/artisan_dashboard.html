@@ -142,6 +142,7 @@
               <th class="px-6 py-3">🧑 Buyer</th>
               <th class="px-6 py-3">📍 Shipping</th>
               <th class="px-6 py-3">🎯 Status</th>
+              <th class="px-6 py-3">💳 Payment</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-sand">
@@ -162,31 +163,44 @@
                 {{ item.order.address }}<br>
                 {{ item.order.city }}, {{ item.order.state }} - {{ item.order.postal_code }}
               </td>
-              <!-- Status -->
-                <td class="px-6 py-4">
-                  {% if item.order.status == "pending" %}
-                    <span class="text-yellow-800 bg-yellow-100 px-2 py-1 rounded text-xs font-semibold">Pending</span>
-                    <form method="POST" action="{% url 'update_order_status' item.order.id %}" class="mt-1">
-                      {% csrf_token %}
-                      <input type="hidden" name="status" value="confirmed">
-                      <button type="submit" class="text-xs text-indigo-600 hover:underline mt-1">Mark as Confirmed</button>
-                    </form>
-                  {% elif item.order.status == "confirmed" %}
-                    <span class="text-blue-800 bg-blue-100 px-2 py-1 rounded text-xs font-semibold">Confirmed</span>
-                    <form method="POST" action="{% url 'update_order_status' item.order.id %}" class="mt-1">
-                      {% csrf_token %}
-                      <input type="hidden" name="status" value="shipped">
-                      <button type="submit" class="text-xs text-blue-600 hover:underline mt-1">Mark as Shipped</button>
-                    </form>
-                  {% elif item.order.status == "shipped" %}
-                    <span class="text-blue-800 bg-blue-100 px-2 py-1 rounded text-xs font-semibold">Shipped</span>
-                  {% elif item.order.status == "delivered" %}
-                    <span class="text-green-800 bg-green-100 px-2 py-1 rounded text-xs font-semibold">Delivered</span>
-                  {% else %}
-                    <span class="text-gray-800 bg-gray-200 px-2 py-1 rounded text-xs font-semibold">{{ item.order.status }}</span>
-                  {% endif %}
-                </td>
 
+              <!-- Status -->
+              <td class="px-6 py-4">
+                {% if item.order.status == "pending" %}
+                  <span class="text-yellow-800 bg-yellow-100 px-2 py-1 rounded text-xs font-semibold">Pending</span>
+                  <form method="POST" action="{% url 'update_order_status' item.order.id %}" class="mt-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="confirmed">
+                    <button type="submit" class="text-xs text-indigo-600 hover:underline mt-1">Mark as Confirmed</button>
+                  </form>
+                {% elif item.order.status == "confirmed" %}
+                  <span class="text-blue-800 bg-blue-100 px-2 py-1 rounded text-xs font-semibold">Confirmed</span>
+                  <form method="POST" action="{% url 'update_order_status' item.order.id %}" class="mt-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="shipped">
+                    <button type="submit" class="text-xs text-blue-600 hover:underline mt-1">Mark as Shipped</button>
+                  </form>
+                {% elif item.order.status == "shipped" %}
+                  <span class="text-blue-800 bg-blue-100 px-2 py-1 rounded text-xs font-semibold">Shipped</span>
+                {% elif item.order.status == "delivered" %}
+                  <span class="text-green-800 bg-green-100 px-2 py-1 rounded text-xs font-semibold">Delivered</span>
+                {% else %}
+                  <span class="text-gray-800 bg-gray-200 px-2 py-1 rounded text-xs font-semibold">{{ item.order.status }}</span>
+                {% endif %}
+              </td>
+
+              <!-- Payment Status (New) -->
+              <td class="px-6 py-4">
+                {% if item.order.payment_status == "paid" or item.order.payment_status == "successful" %}
+                  <span class="text-green-800 bg-green-100 px-2 py-1 rounded text-xs font-semibold">Paid</span>
+                {% elif item.order.payment_status == "failed" %}
+                  <span class="text-red-800 bg-red-100 px-2 py-1 rounded text-xs font-semibold">Payment Failed</span>
+                {% elif item.order.payment_status == "canceled" %}
+                  <span class="text-gray-700 bg-gray-200 px-2 py-1 rounded text-xs font-semibold">Canceled</span>
+                {% else %}
+                  <span class="text-yellow-800 bg-yellow-100 px-2 py-1 rounded text-xs font-semibold">Pending</span>
+                {% endif %}
+              </td>
             </tr>
             {% endfor %}
           </tbody>

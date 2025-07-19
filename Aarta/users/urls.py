@@ -1,14 +1,20 @@
 from django.urls import path
 
-from users import views
+from products.views import artisan_dashboard
+from . import views
 
 urlpatterns = [
-    path('register/',views.register_view,name='register'),
+    # Auth
+    path('register/', views.register_view, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('pending-approval/', views.pending_approval_view, name='pending_approval'),
-    path('login/',views.login_view,name='login'),
-    path('logout/',views.logout_view,name='logout'),
-    path('dashboard/',views.artisan_dashboard,name='artisan_dashboard'),
-    path('buyer-dashboard/', views.buyer_dashboard, name='buyer_dashboard'),
-    path('artisan/edit/', views.edit_artisan_profile, name='edit_artisan_profile'),
 
+    # Dashboards (with a single entry point)
+    path('dashboard/', views.dashboard_dispatch_view, name='dashboard'),  # Generic entry point
+    path('dashboard/artisan/', artisan_dashboard, name='artisan_dashboard'),  # Specific artisan URL
+    path('dashboard/buyer/', views.buyer_dashboard, name='buyer_dashboard'),  # Specific buyer URL
+
+    # Profile Management
+    path('profile/artisan/edit/', views.edit_artisan_profile, name='edit_artisan_profile'),
 ]

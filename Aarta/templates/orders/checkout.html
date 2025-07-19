@@ -4,69 +4,80 @@
 {% block title %}Shipping Information{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto bg-peach/60 border border-white/20 shadow-lg rounded-2xl p-10 backdrop-blur-md">
+<div class="max-w-3xl mx-auto bg-peach/60 border border-white/20 shadow-lg rounded-2xl p-10 backdrop-blur-md">
 
-  <h2 class="text-3xl font-serif font-bold text-charcoal mb-8 text-center">
+  <h2 class="text-4xl font-serif font-bold text-charcoal mb-10 text-center">
     Confirm Your <span class="text-[#AB531F]">Shipping</span> Details
   </h2>
 
-  <!-- ✅ Form posts to place_order -->
+  {% if messages %}
+    <div class="mb-6 space-y-2">
+      {% for message in messages %}
+        <div class="p-4 text-sm text-red-800 rounded-lg bg-red-100 border border-red-300" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   <form method="POST" action="{% url 'place_order' %}" novalidate>
     {% csrf_token %}
 
-    <!-- 🟤 Saved Addresses -->
     {% if saved_addresses %}
-      <div class="mb-8">
+      <div class="mb-10">
         <h3 class="text-lg font-semibold text-dark mb-3">Select a saved address:</h3>
-        {% for addr in saved_addresses %}
-          <label class="block border border-brown/20 p-4 rounded-md mb-2 bg-white/70">
-            <input type="radio" name="use_saved" value="{{ addr.id }}" class="mr-2 accent-brown">
-            <strong>{{ addr.full_name }}</strong><br>
-            {{ addr.phone_number }}<br>
-            {{ addr.address }}, {{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }}
-          </label>
-        {% endfor %}
-        <hr class="my-6 border-white/20">
-        <p class="text-sm text-gray-700 mb-4">Or enter a new address below:</p>
+        <div class="space-y-3">
+          {% for addr in saved_addresses %}
+            <label class="block bg-white/70 border border-brown/20 p-4 rounded-lg cursor-pointer hover:border-brown transition">
+              <input type="radio" name="use_saved" value="{{ addr.id }}" class="mr-2 accent-brown">
+              <div class="text-sm leading-relaxed">
+                <strong>{{ addr.full_name }}</strong><br>
+                {{ addr.phone_number }}<br>
+                {{ addr.address }}, {{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }}
+              </div>
+            </label>
+          {% endfor %}
+        </div>
+
+        <hr class="my-8 border-white/30">
+        <p class="text-sm text-gray-700 mb-4 font-medium">Or enter a new address below:</p>
       </div>
     {% endif %}
 
-    <!-- ✅ Show errors if any -->
     {% if shipping_form.errors %}
-      <div class="text-red-600 text-sm mb-4">
-        Please correct the errors below.
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-sm">
+        <strong>Whoops!</strong> Please correct the errors below.
       </div>
     {% endif %}
 
-    <!-- 🟤 New Address Fields -->
-    {% for field in shipping_form %}
-      <div class="mb-5">
-        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-dark mb-1">
-          {{ field.label }}
-        </label>
-        {{ field }}
+    <div class="space-y-5">
+      {% for field in shipping_form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-dark mb-1">
+            {{ field.label }}
+          </label>
+          {{ field|add_class:"w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brown/50" }}
 
-        {% if field.help_text %}
-          <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
-        {% endif %}
-        {% for error in field.errors %}
-          <p class="text-sm text-red-600 mt-1">{{ error }}</p>
-        {% endfor %}
-      </div>
-    {% endfor %}
+          {% if field.help_text %}
+            <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+          {% endif %}
+          {% for error in field.errors %}
+            <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
 
-    <!-- 🟤 Save Address Checkbox -->
-    <div class="flex items-center mb-6">
+    <div class="flex items-center mt-6">
       <input type="checkbox" id="save_address" name="save_address" class="mr-2 accent-brown">
       <label for="save_address" class="text-sm text-dark">
-        Save this address to your account for future use
+        Save this address for future use
       </label>
     </div>
 
-    <!-- 🟤 Submit Button -->
-    <div class="text-right mt-8">
+    <div class="mt-10 text-right">
       <button type="submit"
-              class="bg-brown text-white px-6 py-2 rounded-md hover:bg-mahogany transition duration-300">
+              class="bg-brown hover:bg-mahogany text-white font-medium py-2 px-6 rounded-md transition duration-300 shadow-md">
         Confirm & Place Order
       </button>
     </div>

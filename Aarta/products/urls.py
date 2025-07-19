@@ -1,23 +1,20 @@
 from django.urls import path
-
-from products import views
+from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from products.views import update_order_status
-
-urlpatterns =[
+urlpatterns = [
+    # Public-facing URLs
     path('', views.home, name='home'),
     path('gallery/', views.product_gallery, name='product_gallery'),
-    path('add/',views.add_product,name='add_product'),
-    path('my-products/',views.my_products,name='my_products'),
-    path('edit/<int:pk>',views.edit_product,name='edit_product'),
-    path('delete/<int:pk>',views.delete_product,name='delete_product'),
-    path('dashboard/',views.artisan_dashboard,name='artisan_dashboard'),
-    path('<int:pk>/', views.product_detail, name='product_detail'),
-    path('<int:image_id>/delete-image/', views.delete_product_image, name='delete_product_image'),
-    path('artisan/orders/<int:order_id>/update/', update_order_status, name='update_order_status'),
 
 
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+    # CRUD URLs for Products, grouped under 'product/'
+    path('product/add/', views.add_product, name='add_product'),
+    path('product/<int:pk>/', views.product_detail, name='product_detail'),
+    path('product/<int:pk>/edit/', views.edit_product, name='edit_product'),
+    path('product/<int:pk>/delete/', views.delete_product, name='delete_product'),
+    path('product/image/<int:image_id>/delete/', views.delete_product_image, name='delete_product_image'),
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
