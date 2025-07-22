@@ -4,83 +4,164 @@
 {% block title %}Shipping Information{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto bg-peach/60 border border-white/20 shadow-lg rounded-2xl p-10 backdrop-blur-md">
+<div class="max-w-6xl mx-auto px-4 py-10">
+    <h2 class="text-4xl font-serif font-bold text-charcoal mb-10 text-center">
+        Confirm Your <span class="text-[#AB531F]">Shipping</span> Details
+    </h2>
 
-  <h2 class="text-4xl font-serif font-bold text-charcoal mb-10 text-center">
-    Confirm Your <span class="text-[#AB531F]">Shipping</span> Details
-  </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Left Column: Shipping Form -->
+        <div class="md:col-span-2 bg-peach/60 border border-white/20 shadow-lg rounded-2xl p-8 backdrop-blur-md">
+            <form method="POST" action="{% url 'place_order' %}" id="shipping-form" novalidate>
+                {% csrf_token %}
 
-  {% if messages %}
-    <div class="mb-6 space-y-2">
-      {% for message in messages %}
-        <div class="p-4 text-sm text-red-800 rounded-lg bg-red-100 border border-red-300" role="alert">
-          {{ message }}
+                {% if saved_addresses %}
+                <div class="mb-10">
+                    <h3 class="text-lg font-semibold text-dark mb-3">Select a saved address:</h3>
+                    <div class="space-y-3">
+                        {% for addr in saved_addresses %}
+                        <label class="block bg-white/70 border border-brown/20 p-4 rounded-lg cursor-pointer hover:border-brown transition">
+                            <input type="radio" name="use_saved" value="{{ addr.id }}" class="mr-2 accent-brown saved-address-radio"
+                                   data-state="{{ addr.state }}">
+                            <div class="text-sm leading-relaxed">
+                                <strong>{{ addr.full_name }}</strong><br>
+                                {{ addr.phone_number }}<br>
+                                {{ addr.address }}, {{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }}
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <hr class="my-8 border-white/30">
+                    <p class="text-sm text-gray-700 mb-4 font-medium">Or enter a new address below:</p>
+                </div>
+                {% endif %}
+
+                {% if shipping_form.errors or form.non_field_errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-sm">
+                    <strong>Whoops!</strong> Please correct the errors below.
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div class="space-y-5">
+                    {% for field in shipping_form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-dark mb-1">
+                            {{ field.label }}
+                        </label>
+                        {{ field|add_class:"w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brown/50" }}
+                        {% if field.errors %}<p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="flex items-center mt-6">
+                    <input type="checkbox" id="save_address" name="save_address" class="mr-2 accent-brown">
+                    <label for="save_address" class="text-sm text-dark">Save this address for future use</label>
+                </div>
+            </form>
         </div>
-      {% endfor %}
-    </div>
-  {% endif %}
 
-  <form method="POST" action="{% url 'place_order' %}" novalidate>
-    {% csrf_token %}
-
-    {% if saved_addresses %}
-      <div class="mb-10">
-        <h3 class="text-lg font-semibold text-dark mb-3">Select a saved address:</h3>
-        <div class="space-y-3">
-          {% for addr in saved_addresses %}
-            <label class="block bg-white/70 border border-brown/20 p-4 rounded-lg cursor-pointer hover:border-brown transition">
-              <input type="radio" name="use_saved" value="{{ addr.id }}" class="mr-2 accent-brown">
-              <div class="text-sm leading-relaxed">
-                <strong>{{ addr.full_name }}</strong><br>
-                {{ addr.phone_number }}<br>
-                {{ addr.address }}, {{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }}
-              </div>
-            </label>
-          {% endfor %}
+        <!-- Right Column: Order Summary -->
+        <div class="md:col-span-1">
+            <div class="bg-white border border-sand rounded-xl shadow p-6 h-fit sticky top-24">
+                <h3 class="text-xl font-semibold text-charcoal mb-4">Order Summary</h3>
+                <div class="text-sm text-gray-700 space-y-2">
+                    <p class="flex justify-between">
+                        <span class="font-medium">Subtotal:</span>
+                        <span>₹{{ subtotal|floatformat:2 }}</span>
+                    </p>
+                    <p class="flex justify-between">
+                        <span class="font-medium">Shipping:</span>
+                        <span id="shipping-cost-display">₹{{ estimated_shipping|floatformat:2 }}</span>
+                    </p>
+                    <hr class="my-2">
+                    <p class="flex justify-between text-base font-bold text-brown">
+                        <span>Grand Total:</span>
+                        <span id="grand-total-display">₹{{ grand_total|floatformat:2 }}</span>
+                    </p>
+                    <p id="shipping-note" class="text-xs text-gray-500 text-right">Final cost calculated from your address.</p>
+                </div>
+                <button type="submit" form="shipping-form"
+                        class="w-full mt-6 bg-brown text-white px-6 py-3 text-center rounded-lg hover:bg-mahogany transition font-medium">
+                    Confirm & Proceed to Payment
+                </button>
+            </div>
         </div>
-
-        <hr class="my-8 border-white/30">
-        <p class="text-sm text-gray-700 mb-4 font-medium">Or enter a new address below:</p>
-      </div>
-    {% endif %}
-
-    {% if shipping_form.errors %}
-      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-sm">
-        <strong>Whoops!</strong> Please correct the errors below.
-      </div>
-    {% endif %}
-
-    <div class="space-y-5">
-      {% for field in shipping_form %}
-        <div>
-          <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-dark mb-1">
-            {{ field.label }}
-          </label>
-          {{ field|add_class:"w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brown/50" }}
-
-          {% if field.help_text %}
-            <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
-          {% endif %}
-          {% for error in field.errors %}
-            <p class="text-sm text-red-600 mt-1">{{ error }}</p>
-          {% endfor %}
-        </div>
-      {% endfor %}
     </div>
-
-    <div class="flex items-center mt-6">
-      <input type="checkbox" id="save_address" name="save_address" class="mr-2 accent-brown">
-      <label for="save_address" class="text-sm text-dark">
-        Save this address for future use
-      </label>
-    </div>
-
-    <div class="mt-10 text-right">
-      <button type="submit"
-              class="bg-brown hover:bg-mahogany text-white font-medium py-2 px-6 rounded-md transition duration-300 shadow-md">
-        Confirm & Place Order
-      </button>
-    </div>
-  </form>
 </div>
+
+<!-- ✅ JAVASCRIPT FOR DYNAMIC SHIPPING CALCULATION -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stateInput = document.getElementById('{{ shipping_form.state.id_for_label }}');
+    const savedAddressRadios = document.querySelectorAll('.saved-address-radio');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const calculateUrl = "{% url 'calculate_shipping' %}";
+
+    const shippingCostEl = document.getElementById('shipping-cost-display');
+    const grandTotalEl = document.getElementById('grand-total-display');
+    const shippingNoteEl = document.getElementById('shipping-note');
+    const subtotal = {{ subtotal|floatformat:2 }};
+
+    function updateShippingCost(stateValue) {
+        if (!stateValue) {
+            shippingCostEl.innerText = `₹{{ estimated_shipping|floatformat:2 }}`;
+            grandTotalEl.innerText = `₹{{ grand_total|floatformat:2 }}`;
+            shippingNoteEl.innerText = 'Final cost calculated from your address.';
+            return;
+        }
+
+        shippingCostEl.innerText = 'Calculating...';
+
+        const formData = new FormData();
+        formData.append('state', stateValue);
+
+        fetch(calculateUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                shippingCostEl.innerText = `₹${data.shipping_cost.toFixed(2)}`;
+                grandTotalEl.innerText = `₹${data.grand_total.toFixed(2)}`;
+                shippingNoteEl.innerText = 'Shipping cost updated.';
+            } else {
+                shippingCostEl.innerText = 'N/A';
+                grandTotalEl.innerText = `₹${subtotal.toFixed(2)}`;
+                shippingNoteEl.innerText = 'Could not calculate shipping.';
+            }
+        })
+        .catch(error => {
+            console.error('Shipping calculation error:', error);
+            shippingNoteEl.innerText = 'Error calculating shipping.';
+        });
+    }
+
+    // Event listener for the new address state field
+    if (stateInput) {
+        stateInput.addEventListener('change', function() {
+            // Uncheck any saved addresses if user types a new one
+            savedAddressRadios.forEach(radio => radio.checked = false);
+            updateShippingCost(this.value);
+        });
+    }
+
+    // Event listener for saved address radio buttons
+    savedAddressRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                // Clear the new address form if user selects a saved one
+                if (stateInput) stateInput.value = '';
+                updateShippingCost(this.dataset.state);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

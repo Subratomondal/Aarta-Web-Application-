@@ -17,4 +17,5 @@ urlpatterns = [
 
     # Profile Management
     path('profile/artisan/edit/', views.edit_artisan_profile, name='edit_artisan_profile'),
+    path('profile/payout-settings/', views.payout_settings_view, name='payout_settings'),
 ]

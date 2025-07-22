@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 
 from products.models import Product
-from users.forms import RegisterForm, ArtisanProfileForm
+from users.forms import RegisterForm, ArtisanProfileForm, ArtisanPayoutForm
 from users.models import ArtisanProfile
 
 
@@ -98,3 +98,24 @@ def dashboard_dispatch_view(request):
     else:
         # Otherwise, they are a buyer
         return redirect('buyer_dashboard')
+
+@login_required
+def payout_settings_view(request):
+    # Security check: Only approved artisans can access this page
+    if not request.user.is_artisan or not request.user.is_approved_artisan:
+        messages.error(request, "Access denied.")
+        return redirect('home')
+
+    # We can safely assume the profile exists for an approved artisan
+    profile = request.user.artisanprofile
+
+    if request.method == 'POST':
+        form = ArtisanPayoutForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your payout details have been updated successfully.")
+            return redirect('artisan_dashboard')
+    else:
+        form = ArtisanPayoutForm(instance=profile)
+
+    return render(request, 'users/payout_settings.html', {'form': form})

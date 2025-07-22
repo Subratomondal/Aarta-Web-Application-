@@ -1,13 +1,16 @@
-
+import os
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from users.models import ArtisanProfile, User
 
 
-# Create your models here.
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    is_featured = models.BooleanField(default=False)  # 👈 Admin-controlled
+    is_featured = models.BooleanField(default=False)
+
     def __str__(self):
         return self.name
 
@@ -18,11 +21,32 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField()
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    location = models.CharField(max_length=100)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    location = models.CharField(max_length=100) # This can be the artisan's location
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     is_featured = models.BooleanField(default=False)
+
+    # --- NEW LOGISTICS FIELDS ---
+    # These fields store the dimensions and weight of the FINAL PACKAGED item.
+    weight_in_grams = models.PositiveIntegerField(
+        default=500,
+        help_text="Weight of the packaged item in grams (e.g., 500 for 0.5 kg)"
+    )
+    length_in_cm = models.DecimalField(
+        max_digits=6, decimal_places=2, default=10.00,
+        help_text="Length of the package in centimeters"
+    )
+    width_in_cm = models.DecimalField(
+        max_digits=6, decimal_places=2, default=10.00,
+        help_text="Width of the package in centimeters"
+    )
+    height_in_cm = models.DecimalField(
+        max_digits=6, decimal_places=2, default=10.00,
+        help_text="Height of the package in centimeters"
+    )
+    # ---------------------------
+
     def __str__(self):
         return self.name
 
@@ -35,22 +59,18 @@ class ProductImage(models.Model):
         return f"Image for {self.product.name}"
 
 
-
 class Review(models.Model):
     buyer = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    rating = models.IntegerField()
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)] # Added validators
+    )
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Review by {self.buyer.username} on {self.product.name}"
 
-
-
-import os
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 
 @receiver(post_delete, sender=ProductImage)
 def delete_image_file(sender, instance, **kwargs):
@@ -61,4 +81,5 @@ def delete_image_file(sender, instance, **kwargs):
         try:
             os.remove(instance.image_path.path)
         except Exception as e:
+            # Using a logger is better for production
             print(f"Error deleting file: {e}")

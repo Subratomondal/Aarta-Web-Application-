@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Payout Settings{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 shadow-lg rounded-xl border border-sand mt-10">
+  <h2 class="text-3xl font-display font-semibold text-brown mb-2 text-center">🏦 Payout Settings</h2>
+  <p class="text-center text-sm text-gray-600 mb-6">Manage your bank account details for receiving payments.</p>
+
+  <!-- Security Notice -->
+  <div class="bg-blue-50 border border-blue-200 text-blue-800 text-sm p-4 rounded-lg mb-6">
+    <strong>Security Notice:</strong> Your financial information is sensitive. It is stored securely and will only be used for processing your payouts from Aarta. We will never share this information with third parties.
+  </div>
+
+  <form method="POST" class="space-y-5">
+    {% csrf_token %}
+
+    <!-- General Form Errors -->
+    {% if form.non_field_errors %}
+      <div class="p-3 bg-red-100 text-red-700 rounded-md text-sm">
+        {{ form.non_field_errors.0 }}
+      </div>
+    {% endif %}
+
+    <!-- Account Holder Name -->
+    <div>
+      <label for="{{ form.account_holder_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+        {{ form.account_holder_name.label }}
+      </label>
+      {% render_field form.account_holder_name class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-brown" %}
+      <p class="text-xs text-gray-500 mt-1">{{ form.account_holder_name.help_text }}</p>
+      {% if form.account_holder_name.errors %}<p class="text-sm text-red-600 mt-1">{{ form.account_holder_name.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Bank Account Number -->
+    <div>
+      <label for="{{ form.bank_account_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+        {{ form.bank_account_number.label }}
+      </label>
+      {% render_field form.bank_account_number class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-brown" %}
+      <p class="text-xs text-gray-500 mt-1">{{ form.bank_account_number.help_text }}</p>
+      {% if form.bank_account_number.errors %}<p class="text-sm text-red-600 mt-1">{{ form.bank_account_number.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- IFSC Code -->
+    <div>
+      <label for="{{ form.ifsc_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+        {{ form.ifsc_code.label }}
+      </label>
+      {% render_field form.ifsc_code class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-brown" %}
+      <p class="text-xs text-gray-500 mt-1">{{ form.ifsc_code.help_text }}</p>
+      {% if form.ifsc_code.errors %}<p class="text-sm text-red-600 mt-1">{{ form.ifsc_code.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Bank Name -->
+    <div>
+      <label for="{{ form.bank_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+        {{ form.bank_name.label }}
+      </label>
+      {% render_field form.bank_name class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-brown" %}
+      <p class="text-xs text-gray-500 mt-1">{{ form.bank_name.help_text }}</p>
+      {% if form.bank_name.errors %}<p class="text-sm text-red-600 mt-1">{{ form.bank_name.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-right pt-4">
+      <button type="submit" class="bg-brown hover:bg-mahogany text-white font-semibold px-6 py-2 rounded shadow transition duration-200">
+        💾 Save Payout Details
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

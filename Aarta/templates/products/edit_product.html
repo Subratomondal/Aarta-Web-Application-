@@ -11,55 +11,96 @@
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-            <p class="text-sm text-red-600">{{ form.non_field_errors.0 }}</p>
+            <div class="text-sm text-red-600 bg-red-100 border border-red-200 p-3 rounded-md">
+                {{ form.non_field_errors.0 }}
+            </div>
         {% endif %}
 
-        {% for field in form %}
-            <div>
-                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-dark mb-1">
-                    {{ field.label }}
-                </label>
-                {{ field|add_class:"w-full border border-sand px-4 py-2 rounded-md focus:ring-brown focus:border-brown bg-white/70 backdrop-blur-md" }}
-                {% if field.errors %}
-                    <p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>
+        <!-- Main Product Details -->
+        <div class="space-y-5 p-4 border-b border-sand/50">
+            {% for field in form %}
+                {% if field.name not in "weight_in_grams,length_in_cm,width_in_cm,height_in_cm" %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-dark mb-1">
+                            {{ field.label }}
+                        </label>
+                        {{ field|add_class:"w-full border border-sand px-4 py-2 rounded-md bg-white/70 backdrop-blur-md focus:ring-brown focus:border-brown" }}
+                        {% if field.errors %}
+                            <p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
                 {% endif %}
-            </div>
-        {% endfor %}
-
-        <!-- Upload new images -->
-        <div>
-            <label for="images" class="block text-sm font-medium text-dark mb-1">
-                Add More Images (Max 4 in total)
-            </label>
-            <input type="file" name="images" id="images" multiple
-                   class="w-full border border-sand px-4 py-2 rounded-md bg-white/70"
-                   {% if remaining_uploads == 0 %} disabled {% endif %}
-                   onchange="checkImageLimit(this)">
-            <p class="text-xs text-charcoal/70 mt-1">
-                You can upload {{ remaining_uploads }} more image(s).
-            </p>
-            <p id="image-error" class="text-xs text-red-600 mt-1 hidden">
-                ⚠️ You can only have a maximum of 4 images.
-            </p>
+            {% endfor %}
         </div>
 
-        <!-- Show existing images -->
-        {% if images %}
-        <div>
-            <label class="block text-sm font-medium text-dark mb-1">Existing Images</label>
+        <!-- Shipping & Logistics Details -->
+        <div class="space-y-5 p-4">
+            <h3 class="text-lg font-semibold text-charcoal">Shipping & Logistics Details</h3>
+            <p class="text-xs text-charcoal/70 -mt-3">Enter the weight and dimensions of the **final packaged item**.</p>
+
+            <div>
+                <label for="{{ form.weight_in_grams.id_for_label }}" class="block text-sm font-medium text-dark mb-1">{{ form.weight_in_grams.label }}</label>
+                {{ form.weight_in_grams|add_class:"w-full border border-sand px-4 py-2 rounded-md bg-white/70" }}
+                <p class="text-xs text-gray-500 mt-1">{{ form.weight_in_grams.help_text }}</p>
+                {% if form.weight_in_grams.errors %}<p class="text-sm text-red-600 mt-1">{{ form.weight_in_grams.errors.0 }}</p>{% endif %}
+            </div>
+
             <div class="grid grid-cols-3 gap-4">
-                {% for img in images %}
-                <div class="relative group">
-                    <img src="{{ img.image_path.url }}" class="w-full h-28 object-cover rounded border" alt="Product Image">
-                    <a href="{% url 'delete_product_image' img.id %}"
-                       class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700">
-                        ✕
-                    </a>
+                <div>
+                    <label for="{{ form.length_in_cm.id_for_label }}" class="block text-sm font-medium text-dark mb-1">{{ form.length_in_cm.label }}</label>
+                    {{ form.length_in_cm|add_class:"w-full border border-sand px-4 py-2 rounded-md bg-white/70" }}
+                    {% if form.length_in_cm.errors %}<p class="text-sm text-red-600 mt-1">{{ form.length_in_cm.errors.0 }}</p>{% endif %}
                 </div>
-                {% endfor %}
+                <div>
+                    <label for="{{ form.width_in_cm.id_for_label }}" class="block text-sm font-medium text-dark mb-1">{{ form.width_in_cm.label }}</label>
+                    {{ form.width_in_cm|add_class:"w-full border border-sand px-4 py-2 rounded-md bg-white/70" }}
+                    {% if form.width_in_cm.errors %}<p class="text-sm text-red-600 mt-1">{{ form.width_in_cm.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.height_in_cm.id_for_label }}" class="block text-sm font-medium text-dark mb-1">{{ form.height_in_cm.label }}</label>
+                    {{ form.height_in_cm|add_class:"w-full border border-sand px-4 py-2 rounded-md bg-white/70" }}
+                    {% if form.height_in_cm.errors %}<p class="text-sm text-red-600 mt-1">{{ form.height_in_cm.errors.0 }}</p>{% endif %}
+                </div>
             </div>
         </div>
-        {% endif %}
+
+        <!-- Image Management -->
+        <div class="p-4 border-t border-sand/50 space-y-5">
+            <!-- Upload new images -->
+            <div>
+                <label for="images" class="block text-sm font-medium text-dark mb-1">
+                    Add More Images (Max 4 in total)
+                </label>
+                <input type="file" name="images" id="images" multiple
+                       class="w-full border border-sand px-4 py-2 rounded-md bg-white/70"
+                       {% if remaining_uploads == 0 %} disabled {% endif %}
+                       onchange="checkImageLimit(this)">
+                <p class="text-xs text-charcoal/70 mt-1">
+                    You can upload {{ remaining_uploads }} more image(s).
+                </p>
+                <p id="image-error" class="text-xs text-red-600 mt-1 hidden">
+                    ⚠️ You can only have a maximum of 4 images.
+                </p>
+            </div>
+
+            <!-- Show existing images -->
+            {% if images %}
+            <div>
+                <label class="block text-sm font-medium text-dark mb-1">Existing Images</label>
+                <div class="grid grid-cols-3 gap-4">
+                    {% for img in images %}
+                    <div class="relative group">
+                        <img src="{{ img.image_path.url }}" class="w-full h-28 object-cover rounded border" alt="Product Image">
+                        <a href="{% url 'delete_product_image' img.id %}"
+                           class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700">
+                            ✕
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
 
         <button type="submit" class="w-full bg-brown text-white py-2 rounded-md hover:bg-mahogany transition">
             Save Changes
@@ -67,7 +108,6 @@
     </form>
 </div>
 
-<!-- JS to prevent more than 4 total images -->
 <script>
     function checkImageLimit(input) {
         const maxImages = 4;

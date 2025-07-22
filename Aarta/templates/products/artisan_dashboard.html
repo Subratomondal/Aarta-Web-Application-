@@ -3,15 +3,21 @@
 
 {% block content %}
     <div class="max-w-6xl mx-auto px-4 py-10">
-      <div class="flex justify-between items-center mb-8">
+      <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
         <h2 class="text-4xl font-bold text-brown">Hello, {{ user.username }} 👋</h2>
-        <a href="{% url 'edit_artisan_profile' %}" class="bg-brown text-white px-4 py-2 rounded hover:bg-mahogany transition">
-          ✏️ Edit Profile
-        </a>
+        <!-- ✅ Action Buttons Group -->
+        <div class="flex items-center gap-4">
+          <a href="{% url 'payout_settings' %}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium shadow">
+            � Payout Settings
+          </a>
+          <a href="{% url 'edit_artisan_profile' %}" class="bg-brown text-white px-4 py-2 rounded-lg hover:bg-mahogany transition text-sm font-medium shadow">
+            ✏️ Edit Profile
+          </a>
+        </div>
       </div>
     </div>
 
-  <!-- Dashboard Stats (unchanged) -->
+  <!-- Dashboard Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
     <div class="bg-white p-6 rounded-xl shadow border border-sand flex items-center gap-4">
       <div class="text-3xl">📦</div>
@@ -102,13 +108,11 @@
         <div class="relative">
           <img id="carouselImage-{{ product.id }}" class="w-full max-h-[60vh] object-contain rounded border border-sand mx-auto" alt="Product Image" src="">
 
-          <!-- Prev Button -->
           <button onclick="prevImage({{ product.id }})"
                   class="absolute left-0 top-1/2 transform -translate-y-1/2 px-3 py-2 bg-white text-gray-700 rounded-full shadow hover:bg-brown hover:text-white">
             &#10094;
           </button>
 
-          <!-- Next Button -->
           <button onclick="nextImage({{ product.id }})"
                   class="absolute right-0 top-1/2 transform -translate-y-1/2 px-3 py-2 bg-white text-gray-700 rounded-full shadow hover:bg-brown hover:text-white">
             &#10095;
@@ -152,19 +156,16 @@
               <td class="px-6 py-4">{{ item.quantity }}</td>
               <td class="px-6 py-4">{{ item.order.created_at|date:"M d, Y" }}</td>
 
-              <!-- Buyer Info -->
               <td class="px-6 py-4">
                 {{ item.order.full_name }}<br>
                 <span class="text-xs text-gray-600">{{ item.order.phone_number }}</span>
               </td>
 
-              <!-- Shipping Info -->
               <td class="px-6 py-4 text-sm text-gray-700 leading-tight">
                 {{ item.order.address }}<br>
                 {{ item.order.city }}, {{ item.order.state }} - {{ item.order.postal_code }}
               </td>
 
-              <!-- Status -->
               <td class="px-6 py-4">
                 {% if item.order.status == "pending" %}
                   <span class="text-yellow-800 bg-yellow-100 px-2 py-1 rounded text-xs font-semibold">Pending</span>
@@ -189,7 +190,6 @@
                 {% endif %}
               </td>
 
-              <!-- Payment Status (New) -->
               <td class="px-6 py-4">
                 {% if item.order.payment_status == "paid" or item.order.payment_status == "successful" %}
                   <span class="text-green-800 bg-green-100 px-2 py-1 rounded text-xs font-semibold">Paid</span>
@@ -210,8 +210,6 @@
       <p class="text-gray-500 text-sm">No recent orders yet.</p>
       {% endif %}
     </div>
-
-
 
   <!-- Modal JavaScript -->
   <script>
@@ -262,7 +260,6 @@
     showImage(productId);
   }
 
-  // Keyboard navigation
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       document.querySelectorAll('[id^="galleryModal-"]').forEach(modal => modal.classList.add('hidden'));

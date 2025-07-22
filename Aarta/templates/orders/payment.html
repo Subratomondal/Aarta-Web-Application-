@@ -15,46 +15,66 @@
   <div id="payment-loader" class="text-sm text-gray-600">Opening secure payment gateway...</div>
 
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-    // IMPORTANT: Make sure this is your correct Razorpay Test Key
-    const testKey = "rzp_test_5VSvVYEhWFfwdM";
-
+  <script>
     const options = {
-        key: testKey,
-        amount: "100", // <-- HARDCODED to 1 Rupee (100 paise)
-        currency: "INR",
-        name: "Aarta",
-        description: "Final Test Transaction",
-        order_id: "{{ razorpay_order_id }}", // This MUST come from the backend
+      key: "{{ razorpay_key }}",
+      amount: "{{ amount }}", // Amount in paise from the backend
+      currency: "INR",
+      name: "Aarta", // Using plain 'a' to be safe
+      description: "Secure Payment for Your Order",
+      order_id: "{{ razorpay_order_id }}",
 
-        // Simplified handler for testing
-        handler: function (response) {
-            alert("IT WORKED! Payment ID: " + response.razorpay_payment_id);
-        },
+      handler: function (response) {
+        // Send the payment details to your server for verification
+        fetch("{% url 'verify_payment' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            // Redirect to the order success page on successful verification
+            window.location.href = `/orders/order-success/${data.order_id}/`;
+          } else {
+            alert("Payment verification failed. Please contact support.");
+            window.location.href = "{% url 'my_orders' %}";
+          }
+        });
+      },
 
-        prefill: {
-            name: "Test User",
-            email: "test.user@example.com"
-        },
+      prefill: {
+        name: "{{ user.get_full_name|default:'' }}",
+        email: "{{ user.email|default:'' }}"
+      },
 
-        theme: {
-            color: "#AB531F"
-        },
+      theme: {
+        color: "#AB531F"
+      },
 
-        modal: {
-            ondismiss: function () {
-                alert("Payment modal was closed.");
-            }
+      modal: {
+        ondismiss: function () {
+          alert("Payment was cancelled.");
+          window.location.href = "{% url 'my_orders' %}";
         }
+      }
     };
 
-    // Safety check
-    if (options.key && options.key !== "YOUR_TEST_KEY_HERE" && options.order_id) {
+    // Check if required data from the backend is present
+    if (options.key && options.order_id) {
         const rzp = new Razorpay(options);
         rzp.open();
     } else {
-        alert("Error: Razorpay Key or Order ID is missing.");
+        document.getElementById('payment-loader').innerText = 'Error: Could not initiate payment. Key or Order ID is missing.';
+        alert("A problem occurred while trying to load payment options. Please try again.");
     }
-</script>
+  </script>
 </div>
 {% endblock %}

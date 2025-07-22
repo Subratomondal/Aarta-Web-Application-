@@ -30,4 +30,5 @@ urlpatterns = [
 
     # API Endpoints
     path('api/cancel-pending-payment/<int:order_id>/', views.api_cancel_pending_payment, name='api_cancel_pending_payment'),
+    path('api/calculate-shipping/', views.calculate_shipping_view, name='calculate_shipping'),
 ]
