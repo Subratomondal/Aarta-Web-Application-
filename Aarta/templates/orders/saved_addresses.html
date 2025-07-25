@@ -1,41 +1,89 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load widget_tweaks %}
 
 {% block title %}My Saved Addresses{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">My Saved Addresses</h2>
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <h2 class="text-3xl font-bold text-brown mb-8 text-center">Manage Your Addresses</h2>
 
     {% if messages %}
+        <div class="mb-6">
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            <div class="p-4 text-sm {% if message.tags == 'success' %}text-green-800 bg-green-100 border-green-200{% else %}text-red-800 bg-red-100 border-red-200{% endif %} rounded-lg border" role="alert">
+                {{ message }}
+            </div>
         {% endfor %}
+        </div>
     {% endif %}
 
-    <div class="row">
-        {% for address in addresses %}
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ address.full_name }}</h5>
-                        <p class="card-text">
-                            {{ address.address }}<br>
-                            {{ address.city }}, {{ address.state }} {{ address.postal_code }}<br>
-                            Phone: {{ address.phone_number }}
-                        </p>
-                        {% if address.is_default %}
-                            <span class="badge bg-success">Default</span>
-                        {% endif %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column: Existing Addresses -->
+        <div class="lg:col-span-2">
+            <h3 class="text-xl font-semibold text-charcoal mb-4">Your Saved Addresses</h3>
+            {% if addresses %}
+                <div class="space-y-4">
+                {% for address in addresses %}
+                    <div class="bg-white border border-sand rounded-xl p-4 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div class="text-sm text-gray-700 leading-relaxed">
+                                <strong class="text-base text-dark">{{ address.full_name }}</strong><br>
+                                {{ address.address }}<br>
+                                {{ address.city }}, {{ address.state }} - {{ address.postal_code }}<br>
+                                Phone: {{ address.phone_number }}
+                            </div>
+                            {% if address.is_default %}
+                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1 rounded-full">Default</span>
+                            {% endif %}
                         </div>
+                        <!-- ✅ ACTION BUTTONS ADDED -->
+                        <div class="text-right mt-3 pt-3 border-t border-sand/50">
+                            <a href="#" class="text-sm text-blue-600 hover:underline mr-4 opacity-50 cursor-not-allowed">Edit</a>
+                            <a href="{% url 'delete_address' address.id %}" class="text-sm text-red-600 hover:underline">Delete</a>
+                        </div>
+                    </div>
+                {% endfor %}
                 </div>
-            </div>
-        {% empty %}
-            <div class="col">
-                <p>You have no saved addresses.</p>
-            </div>
-        {% endfor %}
-    </div>
+            {% else %}
+                <p class="text-gray-500">You have no saved addresses yet. Add one using the form.</p>
+            {% endif %}
+        </div>
 
+        <!-- Right Column: Add New Address Form -->
+        <div class="lg:col-span-1">
+            <div class="bg-peach/50 p-6 rounded-2xl shadow-lg border border-sand">
+                <h3 class="text-xl font-semibold text-charcoal mb-4">Add a New Address</h3>
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        <div>
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-dark mb-1">
+                                {{ field.label }}
+                            </label>
+                            {% if field.name == 'address' %}
+                                {% render_field field class="w-full border border-sand px-3 py-2 rounded-md bg-white/70" rows="3" %}
+                            {% elif field.name == 'is_default' %}
+                                <div class="flex items-center gap-2 mt-2">
+                                    {% render_field field class="h-4 w-4 text-brown border-sand rounded" %}
+                                    <span>{{ field.label }}</span>
+                                </div>
+                            {% else %}
+                                {% render_field field class="w-full border border-sand px-3 py-2 rounded-md bg-white/70" %}
+                            {% endif %}
+
+                            {% if field.errors %}
+                                <p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit" class="w-full bg-brown text-white py-2 rounded-md hover:bg-mahogany transition font-medium">
+                        Save Address
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
 {% endblock %}

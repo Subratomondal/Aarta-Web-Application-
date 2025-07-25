@@ -32,5 +32,6 @@ urlpatterns = [
 
                   # Product/public URLs (homepage, gallery) are at the root
                   path('', include('products.urls')),
+                  path('', include('core.urls')),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -18,6 +18,8 @@ urlpatterns = [
     # User Account and Order History
     path('my-orders/', views.my_orders, name='my_orders'),
     path('my-addresses/', views.saved_addresses, name='my_addresses'),
+    # ✅ ADD THIS NEW URL for deleting an address
+    path('my-addresses/delete/<int:address_id>/', views.delete_address, name='delete_address'),
     path('order/<int:order_id>/track/', views.track_order, name='track_order'),
     path('order/cancel/<int:order_id>/', views.cancel_order, name='cancel_order'),
 

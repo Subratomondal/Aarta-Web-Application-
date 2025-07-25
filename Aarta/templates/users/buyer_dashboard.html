@@ -13,7 +13,7 @@
         <div class="bg-brown text-cream p-3 rounded-full group-hover:scale-105 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3 3h18M9 3v18m6-18v18M3 9h18M3 15h18"></path>
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
           </svg>
         </div>
         <h3 class="text-2xl font-semibold text-charcoal">My Orders</h3>
@@ -41,22 +41,6 @@
       </a>
     </div>
 
-    <!-- Future Feature (Optional) -->
-    <!--
-    <div class="bg-white border border-sand p-6 rounded-2xl shadow group">
-      <div class="flex items-center gap-4 mb-4">
-        <div class="bg-charcoal text-cream p-3 rounded-full group-hover:scale-105 transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M5.121 17.804A9.969 9.969 0 0112 15c2.485 0 4.77.912 6.879 2.416M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-semibold text-charcoal">Account Settings</h3>
-      </div>
-      <p class="text-gray-600 mb-4">Update your profile and manage preferences.</p>
-      <a href="#" class="text-brown font-medium hover:underline">Manage Account →</a>
-    </div>
-    -->
     <!-- My Wishlist -->
     <div class="bg-[#FFF8F3] border border-sand p-6 rounded-2xl shadow-md hover:shadow-lg transition group">
       <div class="flex items-center gap-4 mb-4">
@@ -71,6 +55,23 @@
       <p class="text-gray-600 mb-4">Explore items you’ve saved to buy later or track for price drops.</p>
       <a href="{% url 'view_wishlist' %}" class="text-brown font-medium hover:underline">
           View Wishlist →
+      </a>
+    </div>
+
+    <!-- ✅ NEW: My Saved Addresses -->
+    <div class="bg-[#FFF8F3] border border-sand p-6 rounded-2xl shadow-md hover:shadow-lg transition group">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="bg-brown text-cream p-3 rounded-full group-hover:scale-105 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-semibold text-charcoal">My Addresses</h3>
+      </div>
+      <p class="text-gray-600 mb-4">Manage your saved shipping addresses for faster checkout.</p>
+      <a href="{% url 'my_addresses' %}" class="text-brown font-medium hover:underline">
+          Manage Addresses →
       </a>
     </div>
 

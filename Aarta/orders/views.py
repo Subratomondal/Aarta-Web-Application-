@@ -25,7 +25,10 @@ from .models import CartItem, Order, OrderItem, WishlistItem, ShippingAddress
 logger = logging.getLogger(__name__)
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-
+METRO_CITIES = [
+    'mumbai', 'delhi', 'new delhi', 'bangalore', 'bengaluru',
+    'chennai', 'kolkata', 'hyderabad', 'pune', 'ahmedabad'
+]
 # --- VIEWS START HERE ---
 
 @login_required
@@ -60,6 +63,20 @@ def add_to_cart(request, product_id):
     return redirect('view_cart')
 
 
+from decimal import Decimal
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import CartItem, ShippingAddress
+from core.models import ShippingRate
+from collections import defaultdict
+
+# This should be defined once, perhaps in a core/constants.py file or at the top here
+METRO_CITIES = [
+    'mumbai', 'delhi', 'new delhi', 'bangalore', 'bengaluru',
+    'chennai', 'kolkata', 'hyderabad', 'pune', 'ahmedabad'
+]
+
+
 @login_required
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user).select_related('product', 'product__artisan')
@@ -67,31 +84,33 @@ def view_cart(request):
     subtotal = Decimal('0.00')
     estimated_shipping = Decimal('0.00')
 
-    # --- NEW COMBINED SHIPPING LOGIC ---
+    # --- NEW, SMARTER ESTIMATION LOGIC ---
 
-    # Step 1: Group items and their total weights by artisan
-    artisan_packages = defaultdict(lambda: {'total_weight': 0, 'items': []})
+    # Check if the user has a default shipping address to make a better estimate
+    default_address = ShippingAddress.objects.filter(user=request.user, is_default=True).first()
+    is_metro_estimate = False
+    if default_address and default_address.city.strip().lower() in METRO_CITIES:
+        is_metro_estimate = True
+
+    # Group items and their total weights by artisan
+    artisan_packages = defaultdict(lambda: {'total_weight': 0})
     for item in cart_items:
         subtotal += item.get_total_price()
         artisan_id = item.product.artisan.id
-        artisan_packages[artisan_id]['items'].append(item)
         artisan_packages[artisan_id]['total_weight'] += item.product.weight_in_grams * item.quantity
 
-    # Step 2: Calculate shipping for each artisan's package
+    # Calculate shipping for each artisan's package
     shipping_rates = ShippingRate.objects.all()
     for artisan_id, package_data in artisan_packages.items():
         total_weight = package_data['total_weight']
         package_shipping_cost = Decimal('0.00')
 
-        # Find the correct shipping rate for the total weight of this package
         for rate in shipping_rates:
             if total_weight <= rate.weight_slab_grams:
-                # Use the regional rate for estimation in the cart
-                package_shipping_cost = rate.regional_rate
+                # Use metro rate for estimate if user's default address is a metro city
+                package_shipping_cost = rate.metro_rate if is_metro_estimate else rate.regional_rate
                 break
 
-        # If a package is heavier than any slab, we might need a fallback.
-        # For now, we'll assume it falls into one.
         estimated_shipping += package_shipping_cost
 
     # --- END OF NEW LOGIC ---
@@ -111,7 +130,6 @@ def view_cart(request):
 
     return render(request, 'orders/cart.html', context)
 
-
 @login_required
 def remove_from_cart(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
@@ -122,30 +140,54 @@ def remove_from_cart(request, item_id):
 
 @login_required
 def checkout(request):
-    cart_items = CartItem.objects.filter(user=request.user).select_related('product')
+    cart_items = CartItem.objects.filter(user=request.user).select_related('product', 'product__artisan')
     if not cart_items:
         messages.error(request, "Your cart is empty.")
         return redirect('view_cart')
 
-    # --- Calculate estimated costs for initial display ---
+    # --- DEBUGGING PRINTS START ---
+    print("\n--- CHECKOUT VIEW ESTIMATION ---")
+
+    default_address = ShippingAddress.objects.filter(user=request.user, is_default=True).first()
+    is_metro_estimate = False
+
+    if default_address:
+        user_city = default_address.city.strip().lower()
+        print(f"Found default address. City: '{user_city}'")
+        if user_city in METRO_CITIES:
+            is_metro_estimate = True
+            print("  - City IS a metro city. Using METRO rates for estimate.")
+        else:
+            print("  - City is NOT a metro city. Using REGIONAL rates for estimate.")
+    else:
+        print("No default address found. Using REGIONAL rates for estimate.")
+    # --- DEBUGGING PRINTS END ---
+
     subtotal = Decimal('0.00')
     estimated_shipping = Decimal('0.00')
-    shipping_rates = ShippingRate.objects.all()
 
+    artisan_packages = defaultdict(lambda: {'total_weight': 0})
     for item in cart_items:
         subtotal += item.get_total_price()
-        item_shipping_cost = Decimal('0.00')
+        artisan_id = item.product.artisan.id
+        artisan_packages[artisan_id]['total_weight'] += item.product.weight_in_grams * item.quantity
+
+    shipping_rates = ShippingRate.objects.all()
+    for artisan_id, package_data in artisan_packages.items():
+        total_weight = package_data['total_weight']
+        package_shipping_cost = Decimal('0.00')
+
         for rate in shipping_rates:
-            if item.product.weight_in_grams <= rate.weight_slab_grams:
-                item_shipping_cost = rate.regional_rate  # Use regional rate for estimation
+            if total_weight <= rate.weight_slab_grams:
+                package_shipping_cost = rate.metro_rate if is_metro_estimate else rate.regional_rate
                 break
-        estimated_shipping += item_shipping_cost * item.quantity
+
+        estimated_shipping += package_shipping_cost
 
     grand_total = subtotal + estimated_shipping
-    # --- End of calculation ---
 
     saved_addresses = ShippingAddress.objects.filter(user=request.user)
-    shipping_form = ShippingForm()  # For entering a new address
+    shipping_form = ShippingForm()
 
     context = {
         'cart_items': cart_items,
@@ -161,13 +203,14 @@ def checkout(request):
 
 @login_required
 def place_order(request):
+    # Use select_related to efficiently fetch related objects in one query
     cart_items = CartItem.objects.select_related('product', 'product__artisan').filter(user=request.user)
     if not cart_items.exists():
         messages.error(request, "Your cart is empty.")
         return redirect('view_cart')
 
     if request.method == "POST":
-        # Step 1: Get the customer's shipping address
+        # ... (Your address handling logic is perfect and remains the same) ...
         use_saved = request.POST.get('use_saved')
         shipping_form = ShippingForm(request.POST)
         shipping_data = {}
@@ -191,54 +234,64 @@ def place_order(request):
             messages.error(request, "Invalid shipping details.")
             return redirect('checkout')
 
-        # Step 2: Calculate FINAL, ACCURATE costs with COMBINED SHIPPING
+        # --- FINAL, CORRECTED 3-ZONE CALCULATION ---
         subtotal = Decimal('0.00')
         final_shipping_cost = Decimal('0.00')
         shipping_rates = ShippingRate.objects.all()
+        customer_city = shipping_data.get('city', '').strip().lower()
         customer_state = shipping_data.get('state', '').strip().lower()
 
-        artisan_packages = defaultdict(lambda: {'total_weight': 0, 'artisan_state': ''})
+        artisan_packages = defaultdict(lambda: {'total_weight': 0, 'artisan_city': '', 'artisan_state': ''})
         for item in cart_items:
             subtotal += item.get_total_price()
-            artisan_id = item.product.artisan.id
-            artisan_state = item.product.artisan.state.strip().lower()
-            artisan_packages[artisan_id]['artisan_state'] = artisan_state
-            artisan_packages[artisan_id]['total_weight'] += item.product.weight_in_grams * item.quantity
+            artisan = item.product.artisan
+            artisan_packages[artisan.id]['artisan_city'] = artisan.city.strip().lower() if artisan.city else ''
+            artisan_packages[artisan.id]['artisan_state'] = artisan.state.strip().lower() if artisan.state else ''
+            artisan_packages[artisan.id]['total_weight'] += item.product.weight_in_grams * item.quantity
 
         for artisan_id, package_data in artisan_packages.items():
             total_weight = package_data['total_weight']
+            artisan_city = package_data['artisan_city']
             artisan_state = package_data['artisan_state']
             package_shipping_cost = Decimal('0.00')
 
-            is_regional = (customer_state == artisan_state)
+            if customer_state == artisan_state:
+                zone = 'regional'
+            elif customer_city in METRO_CITIES and artisan_city in METRO_CITIES:
+                zone = 'metro'
+            else:
+                zone = 'national'
 
             for rate in shipping_rates:
                 if total_weight <= rate.weight_slab_grams:
-                    package_shipping_cost = rate.regional_rate if is_regional else rate.national_rate
+                    if zone == 'regional':
+                        package_shipping_cost = rate.regional_rate
+                    elif zone == 'metro':
+                        package_shipping_cost = rate.metro_rate
+                    else:
+                        package_shipping_cost = rate.national_rate
                     break
 
             final_shipping_cost += package_shipping_cost
 
         grand_total = subtotal + final_shipping_cost
+        # --- End of calculation ---
 
+        # ... (Rest of your view is perfect and remains the same) ...
         if grand_total <= 0:
             messages.error(request, "Total amount must be greater than zero.")
             return redirect('view_cart')
 
-        # Step 3: Create Razorpay order
         try:
             razorpay_order = razorpay_client.order.create({
-                "amount": int(grand_total * 100),
-                "currency": "INR",
-                "receipt": f"receipt_{request.user.id}_{cart_items.count()}",
-                "payment_capture": 1
+                "amount": int(grand_total * 100), "currency": "INR",
+                "receipt": f"receipt_{request.user.id}_{cart_items.count()}", "payment_capture": 1
             })
         except Exception as e:
             logger.error(f"Razorpay order creation failed: {str(e)}")
             messages.error(request, "Payment initiation failed. Please try again.")
             return redirect('checkout')
 
-        # Step 4: Store data in session
         request.session['shipping_data'] = shipping_data
         request.session['final_shipping_cost'] = str(final_shipping_cost)
         request.session['razorpay_order_id'] = razorpay_order['id']
@@ -251,6 +304,7 @@ def place_order(request):
         })
 
     return redirect('checkout')
+
 
 @login_required
 def payment_page(request, order_id):
@@ -288,8 +342,30 @@ def order_success(request, order_id):
 @login_required
 def saved_addresses(request):
     addresses = ShippingAddress.objects.filter(user=request.user)
-    return render(request, 'orders/saved_addresses.html', {'addresses': addresses})
+    form = ShippingAddressForm()
 
+    if request.method == 'POST':
+        form = ShippingAddressForm(request.POST)
+        if form.is_valid():
+            new_address = form.save(commit=False)
+            new_address.user = request.user
+
+            # If "is_default" is checked, we need to ensure no other address is the default.
+            if new_address.is_default:
+                # Set all other addresses for this user to is_default=False
+                ShippingAddress.objects.filter(user=request.user).update(is_default=False)
+
+            new_address.save()
+            messages.success(request, "New address saved successfully.")
+            return redirect('my_addresses')  # Redirect back to the same page
+        else:
+            messages.error(request, "Please correct the errors below.")
+
+    context = {
+        'addresses': addresses,
+        'form': form
+    }
+    return render(request, 'orders/saved_addresses.html', context)
 
 @login_required
 def my_orders(request):
@@ -407,26 +483,32 @@ def update_cart_quantity(request, item_id):
             item.quantity = new_quantity
             item.save()
 
-        # --- CORRECT, COMBINED SHIPPING LOGIC ---
+        # --- CORRECT, SMARTER ESTIMATION LOGIC ---
         cart_items = CartItem.objects.filter(user=request.user)
         subtotal = Decimal('0.00')
         estimated_shipping = Decimal('0.00')
 
-        # Step 1: Group items and weights by artisan
+        # Check for a default address to make a better estimate
+        default_address = ShippingAddress.objects.filter(user=request.user, is_default=True).first()
+        is_metro_estimate = False
+        if default_address and default_address.city.strip().lower() in METRO_CITIES:
+            is_metro_estimate = True
+
+        # Group items and weights by artisan
         artisan_packages = defaultdict(lambda: {'total_weight': 0})
         for cart_item in cart_items:
             subtotal += cart_item.get_total_price()
             artisan_id = cart_item.product.artisan.id
             artisan_packages[artisan_id]['total_weight'] += cart_item.product.weight_in_grams * cart_item.quantity
 
-        # Step 2: Calculate shipping for each artisan's package
+        # Calculate shipping for each artisan's package
         shipping_rates = ShippingRate.objects.all()
         for artisan_id, package_data in artisan_packages.items():
             total_weight = package_data['total_weight']
             package_shipping_cost = Decimal('0.00')
             for rate in shipping_rates:
                 if total_weight <= rate.weight_slab_grams:
-                    package_shipping_cost = rate.regional_rate
+                    package_shipping_cost = rate.metro_rate if is_metro_estimate else rate.regional_rate
                     break
             estimated_shipping += package_shipping_cost
         # --- END OF CORRECT LOGIC ---
@@ -454,9 +536,7 @@ def update_cart_quantity(request, item_id):
             'total_quantity': total_quantity
         })
 
-    # ✅ FIX: Corrected the typo from 4G05 to 405
     return JsonResponse({'error': "Invalid request method."}, status=405)
-
 
 @login_required
 def track_order(request, order_id):
@@ -558,35 +638,49 @@ def api_cancel_pending_payment(request, order_id):
 @login_required
 def calculate_shipping_view(request):
     if request.method == 'POST':
+        customer_city = request.POST.get('city', '').strip().lower()
         customer_state = request.POST.get('state', '').strip().lower()
-        cart_items = CartItem.objects.filter(user=request.user)
+        cart_items = CartItem.objects.select_related('product', 'product__artisan').filter(user=request.user)
 
         if not customer_state or not cart_items.exists():
             return JsonResponse({'error': 'State or cart items missing.'}, status=400)
 
-        # --- Use our combined shipping logic ---
+        # --- FINAL, CORRECTED 3-ZONE CALCULATION ---
         subtotal = Decimal('0.00')
         final_shipping_cost = Decimal('0.00')
         shipping_rates = ShippingRate.objects.all()
 
-        artisan_packages = defaultdict(lambda: {'total_weight': 0, 'artisan_state': ''})
+        artisan_packages = defaultdict(lambda: {'total_weight': 0, 'artisan_city': '', 'artisan_state': ''})
         for item in cart_items:
             subtotal += item.get_total_price()
-            artisan_id = item.product.artisan.id
-            artisan_state = item.product.artisan.state.strip().lower()
-            artisan_packages[artisan_id]['artisan_state'] = artisan_state
-            artisan_packages[artisan_id]['total_weight'] += item.product.weight_in_grams * item.quantity
+            artisan = item.product.artisan
+            artisan_packages[artisan.id]['artisan_city'] = artisan.city.strip().lower() if artisan.city else ''
+            artisan_packages[artisan.id]['artisan_state'] = artisan.state.strip().lower() if artisan.state else ''
+            artisan_packages[artisan.id]['total_weight'] += item.product.weight_in_grams * item.quantity
 
         for artisan_id, package_data in artisan_packages.items():
             total_weight = package_data['total_weight']
+            artisan_city = package_data['artisan_city']
             artisan_state = package_data['artisan_state']
             package_shipping_cost = Decimal('0.00')
-            is_regional = (customer_state == artisan_state)
+
+            if customer_state == artisan_state:
+                zone = 'regional'
+            elif customer_city in METRO_CITIES and artisan_city in METRO_CITIES:
+                zone = 'metro'
+            else:
+                zone = 'national'
 
             for rate in shipping_rates:
                 if total_weight <= rate.weight_slab_grams:
-                    package_shipping_cost = rate.regional_rate if is_regional else rate.national_rate
+                    if zone == 'regional':
+                        package_shipping_cost = rate.regional_rate
+                    elif zone == 'metro':
+                        package_shipping_cost = rate.metro_rate
+                    else:
+                        package_shipping_cost = rate.national_rate
                     break
+
             final_shipping_cost += package_shipping_cost
 
         grand_total = subtotal + final_shipping_cost
@@ -598,3 +692,22 @@ def calculate_shipping_view(request):
         })
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+# In orders/views.py
+
+@login_required
+def delete_address(request, address_id):
+    # Find the address, ensuring it belongs to the current user for security
+    address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
+
+    if request.method == 'POST':
+        address.delete()
+        messages.success(request, "Address deleted successfully.")
+        return redirect('my_addresses')
+
+    # This context is for a confirmation page, which is good practice
+    context = {
+        'address': address
+    }
+    return render(request, 'orders/confirm_delete_address.html', context)

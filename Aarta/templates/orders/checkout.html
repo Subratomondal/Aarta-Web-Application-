@@ -17,12 +17,16 @@
 
                 {% if saved_addresses %}
                 <div class="mb-10">
-                    <h3 class="text-lg font-semibold text-dark mb-3">Select a saved address:</h3>
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-dark">Select a saved address:</h3>
+                        <a href="{% url 'my_addresses' %}" class="text-sm text-brown hover:underline font-medium">Manage Addresses</a>
+                    </div>
                     <div class="space-y-3">
                         {% for addr in saved_addresses %}
                         <label class="block bg-white/70 border border-brown/20 p-4 rounded-lg cursor-pointer hover:border-brown transition">
+                            <!-- ✅ FIX: Added data-city attribute -->
                             <input type="radio" name="use_saved" value="{{ addr.id }}" class="mr-2 accent-brown saved-address-radio"
-                                   data-state="{{ addr.state }}">
+                                   data-state="{{ addr.state }}" data-city="{{ addr.city }}">
                             <div class="text-sm leading-relaxed">
                                 <strong>{{ addr.full_name }}</strong><br>
                                 {{ addr.phone_number }}<br>
@@ -91,10 +95,11 @@
     </div>
 </div>
 
-<!-- ✅ JAVASCRIPT FOR DYNAMIC SHIPPING CALCULATION -->
+<!-- JAVASCRIPT FOR DYNAMIC SHIPPING CALCULATION -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const stateInput = document.getElementById('{{ shipping_form.state.id_for_label }}');
+    const cityInput = document.getElementById('{{ shipping_form.city.id_for_label }}');
     const savedAddressRadios = document.querySelectorAll('.saved-address-radio');
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const calculateUrl = "{% url 'calculate_shipping' %}";
@@ -104,8 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const shippingNoteEl = document.getElementById('shipping-note');
     const subtotal = {{ subtotal|floatformat:2 }};
 
-    function updateShippingCost(stateValue) {
-        if (!stateValue) {
+    function updateShippingCost(stateValue, cityValue) {
+        if (!stateValue || !cityValue) {
             shippingCostEl.innerText = `₹{{ estimated_shipping|floatformat:2 }}`;
             grandTotalEl.innerText = `₹{{ grand_total|floatformat:2 }}`;
             shippingNoteEl.innerText = 'Final cost calculated from your address.';
@@ -116,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData();
         formData.append('state', stateValue);
+        formData.append('city', cityValue);
 
         fetch(calculateUrl, {
             method: 'POST',
@@ -143,25 +149,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Event listener for the new address state field
-    if (stateInput) {
-        stateInput.addEventListener('change', function() {
-            // Uncheck any saved addresses if user types a new one
-            savedAddressRadios.forEach(radio => radio.checked = false);
-            updateShippingCost(this.value);
-        });
+    function handleAddressChange() {
+        const selectedRadio = document.querySelector('.saved-address-radio:checked');
+        if (selectedRadio) {
+            if(stateInput) stateInput.value = '';
+            if(cityInput) cityInput.value = '';
+            // ✅ Now correctly reads both state and city from the dataset
+            updateShippingCost(selectedRadio.dataset.state, selectedRadio.dataset.city);
+        } else if (stateInput && cityInput && stateInput.value && cityInput.value) {
+            updateShippingCost(stateInput.value, cityInput.value);
+        } else {
+            updateShippingCost(null, null);
+        }
     }
 
-    // Event listener for saved address radio buttons
-    savedAddressRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (this.checked) {
-                // Clear the new address form if user selects a saved one
-                if (stateInput) stateInput.value = '';
-                updateShippingCost(this.dataset.state);
-            }
-        });
-    });
+    if (stateInput) stateInput.addEventListener('change', handleAddressChange);
+    if (cityInput) cityInput.addEventListener('change', handleAddressChange);
+    savedAddressRadios.forEach(radio => radio.addEventListener('change', handleAddressChange));
 });
 </script>
 {% endblock %}
